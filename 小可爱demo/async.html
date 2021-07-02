@@ -1,0 +1,35 @@
+<html>
+    <head></head>
+    <body>
+        <script>
+            //async 是对promise的封装，避免了promise嵌套回调
+            function request(name){//用setTimeOut模拟请求接口
+                return new Promise(function(resolve,reject){//接口一般是用promise来处理异步请求，then获取结果
+                    setTimeout(function(){
+                        resolve(name);
+                    },2000);
+                });
+            }
+            //如果没有用async await,想要保证两个接口调用顺序，必须等一个返回后请求另一个，需要嵌套
+            request("小白").then(function(res){
+                console.log("已请求到"+res);
+                request("卿相").then(function(res1){
+                    console.log(res1+"已请求到"+res);
+                });
+            });
+            //使用async await后写法更加优雅，接近于同步的代码
+            //注意只有await异步的函数才有作用，异步的指返回类型是Promise的函数
+            async function getAll(){//这些代码等同于上面的代码
+                var res = await request("小白");
+                console.log("已请求到"+res);
+                var res1 = await request("卿相");
+                console.log(res1+"已请求到"+res);
+                return "asyc 返回的Promise"
+            }
+            let fn = getAll();
+            //async并不是真正的同步代码返回值仍然是Promise,promise的结果是async函数return的值。
+            console.log(fn);
+            fn.then(function(res){console.log(res)});
+        </script>
+    </body>
+</html>

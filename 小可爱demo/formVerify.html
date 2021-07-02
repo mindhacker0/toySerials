@@ -1,0 +1,81 @@
+<html>
+    <head>
+        <style>
+            .tip{
+                color: red;
+            }
+            .form-item{
+                display: flex;
+            }
+            .message{
+               font-size: 12px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <div class="form-item" id="name">
+                <div><span class="tip">*</span><span>姓名：</span></div>
+                <div><input /><div class="tip message"><span></span></div></div>
+            </div>
+            <div class="form-item" id="mobile">
+                <div><span class="tip">*</span><span>电话：</span></div>
+                <div><input /><div class="tip message"><span></span></div></div>
+            </div>
+            <div class="form-item" id="age">
+                <div><span class="tip">*</span><span>年龄：</span></div>
+                <div><input /><div class="tip message"><span></span></div></div>
+            </div>
+            <button onclick="doVerify()">验证</button>
+        </div>
+        <script>
+            let rules = {//配置规则，可以有多个规则所以用数组表示每个字段的规则，规则通过数组中的次序确定优先级
+                name:[{
+                    require:true,
+                    message:"姓名必填",
+                },{
+                    message:"姓名错误",
+                    validator:function(value){//只有名字是小明才通过
+                        return value === "小明"
+                    }
+                }],
+                mobile:[{
+                    require:true,
+                    message:"电话必填",
+                }],
+                age:[{
+                    require:true,
+                    message:"年龄必填",
+                },{
+                    message:"年龄不符合范围",
+                    validator:function(value){//年龄大于0小于200
+                        return value >=0 && value<=200;
+                    }
+                }],
+
+            };
+            function doVerify(){
+                for(var i in rules){//便历并解析规则
+                    let formItem = document.getElementById(i);//获取表单元素
+                    let value = formItem.querySelector("input").value;//获取表单输入框值
+                    let tip = formItem.querySelector(".message span");
+                    console.log(value);
+                    if(rules[i] instanceof Array){//对应的规则是数组
+                        for(var item of rules[i]){
+                            if(item.require && value === ""){//判断必填规则，为空字符串不通过
+                                tip.innerText = item.message;
+                                break;//当有一个规则不符合就不判断后面的规则了，保证规则的优先级
+                            }
+                            if(item.validator){//自定义验证规则
+                                if(!item.validator(value)){//没通过自定义规则
+                                    tip.innerText = item.message;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>

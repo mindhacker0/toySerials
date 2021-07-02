@@ -1,0 +1,21 @@
+<html>
+    <head></head>
+    <body>
+        <script>
+            function a({a,...other}){//组合成对象
+                console.log(a,other);//999 {b: "000", c: "111"} other为余下的键值对组成的对象。
+            }
+            a({a:"999",b:"000",c:"111"});
+        </script>
+        <script>
+            var b = {a:1,b:2};
+            var c = {c:3,d:4};
+            var d = {...b,...c};//展开到对象
+            console.log(d);//{a: 1, b: 2, c: 3, d: 4} 将b和c的对象展开组合成d
+        </script>
+        <script>
+            var {a,...f} = {a:1,b:2,c:3};
+            console.log(f);//{b: 2, c: 3}
+        </script>
+    </body>
+</html>

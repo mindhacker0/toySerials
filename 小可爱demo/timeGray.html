@@ -1,0 +1,23 @@
+<html>
+    <head></head>
+    <style>
+        .box{
+            width: 200px;
+            height: 200px;
+        }
+    </style>
+    <body>
+        <div class="box" style="background: skyblue;">
+            小可爱最可爱  小可爱最可爱  小可爱最可爱
+        </div>
+        <script>
+            let bodyELem = document.body;
+            //后端给的时间
+            let endTime = "2021-5-14";
+            console.log(new Date(endTime));//根据字符创建时间对象
+            if(new Date().getTime()>new Date(endTime).getTime()){//当前时间戳大于给定时间戳，也就是过了日期
+                bodyELem.style.filter = "grayscale(100%)";
+            }
+        </script>
+    </body>
+</html>
