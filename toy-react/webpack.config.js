@@ -2,7 +2,8 @@ const webpack = require('webpack');
 // console.log(webpack);
 module.exports={
     entry:{
-        main:'./main.js'
+        main:'./main.js',
+        test:'./test.js'
     },
     devtool:'cheap-module-source-map',
     module:{
