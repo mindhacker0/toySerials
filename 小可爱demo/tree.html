@@ -1,0 +1,76 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+        <!-- 引入样式 -->
+        <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+        <!-- 引入组件库 -->
+        <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    </head>
+    <body>
+        <div id="root">
+            <el-table
+            :data="tableData"
+            style="width: 600px">
+            <el-table-column
+            prop="id"
+            label="ID"
+            width="120">
+            </el-table-column>
+            <el-table-column
+            prop="name"
+            label="姓名"
+            width="120">
+            </el-table-column>
+            <el-table-column
+            label="树结构"
+            width="280">
+                <template slot-scope="scope">
+                    <!-- <div style="height:26px;position: absolute;left: 0;top: 0;"> -->
+                       <el-tree :data="scope.row.treeData" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+                    <!-- </div> -->
+                </template>
+            </el-table-column>
+            </el-table>
+        </div>
+        <script>
+            new Vue({
+               el:"#root",
+               data(){
+                    return {
+                        //表格数据
+                        tableData:[{
+                            id:"xxx",
+                            treeData:[{//树的节点数据，它的children存放了下一级的节点数据
+                                label: '父级标签',
+                                children: [{ 
+                                    label: '二级标签',
+                                    children: [
+                                    {
+                                        label: '三级标签',
+                                        children:[]
+                                    },
+                                    {
+                                        label: '三级标签二',
+                                        children:[]
+                                    }
+                                    ]
+                               }]
+                            }],
+                            name:"喵小萌"
+                        }],
+                        defaultProps: {//配置项
+                            children: 'children',//规定子级数据的属性名子级，也就是说子级数据放在父级对象的children属性下
+                            label: 'label',//要展示的属性名
+                        }
+                    }
+               },
+               methods:{
+                    handleNodeClick(node){
+                        console.log(node);//当前点击的节点数据
+                    }
+               }
+            });
+        </script>
+    </body>
+</html>

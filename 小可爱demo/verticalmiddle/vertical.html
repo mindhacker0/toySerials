@@ -1,0 +1,59 @@
+<html>
+
+<head></head>
+<style></style>
+
+<body>
+    <div class="parent">
+       <button id="download">下载</button>
+    </div>
+    <script>
+      const btn = document.getElementById("download");
+      function getBase64Image(img) {
+            // 创建一个空的canvas元素
+            var canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            // Copy the image contents to the canvas
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            // Get the data-URL formatted image
+            // Firefox supports PNG and JPEG. You could check img.src to
+            // guess the original format, but be aware the using "image/jpg"
+            // will re-encode the image.
+            var dataURL = canvas.toDataURL("image/png");
+            return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+        }
+      btn.onclick = function(){
+        const url = "http://192.168.3.200/ftp/yunyan/ftpFile/20210720/1626799434017.png";
+        // var image = document.createElement('img');
+        // image.setAttribute("src",url);
+        // image.onload = function(e){
+        //    console.log(getBase64Image(this));
+        // }
+        // var elem = document.createElement("a");
+        // elem.setAttribute("target","_blank");
+        // elem.setAttribute("href",url);
+        // elem.click();
+        var ajax=new XMLHttpRequest();
+        ajax.open("OPTIONS", url, true);
+        ajax.responseType = 'blob';
+        ajax.onload= function(e){
+            console.log(e.target.response);
+        };
+        ajax.onerror = function(e){//ajax请求失败将尝试iframe跨域获取。
+            let iframe = document.createElement("iframe");
+            iframe.setAttribute('src',url);
+            document.body.appendChild(iframe);
+            iframe.onload = function(){
+                document.body.removeChild(iframe);
+            }
+        }
+        setTimeout(function(){
+            ajax.send();
+        }, 0);
+      }
+    </script>
+</body>
+
+</html>
