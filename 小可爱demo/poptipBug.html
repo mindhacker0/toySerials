@@ -1,0 +1,56 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="http://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+        <!-- import stylesheet -->
+        <link rel="stylesheet" href="http://unpkg.com/view-design/dist/styles/iview.css">
+        <!-- import iView -->
+        <script src="http://unpkg.com/view-design/dist/iview.min.js"></script>
+    </head>
+    <body>
+        <div id="root">
+            <i-table 
+            border 
+            ref="selection"  
+            size="small" 
+            :columns="columns" 
+            :data="tableData" 
+            :height="200" 
+            style="margin: 10px 0px;"></i-table>
+        </div>
+        <script>
+            new Vue({
+               el:"#root",
+               data(){
+                    return {
+                        //表格数据
+                        tableData:[],
+                        columns:[{
+                            title: "关联团伙",
+                            align: "center",
+                            minWidth: 30,
+                            render: (h, params) => {
+                                const { gangList } = params.row;
+                                const elems = gangList.map(({name}) => h("div",{},name));
+                                return h("Poptip",{
+                                    placement: "bottom",
+                                    width: "80",
+                                },[h("span",{},gangList.length),h("div",{
+                                    attrs: {
+                                        slot: "content"
+                                    },
+                                },elems)])
+                            }
+                        }]
+                    }
+               },
+               mounted(){
+                this.tableData = [{
+                    gangList:[{name:"网"}]
+                }];
+                console.log("mounted");
+               }
+            });
+        </script>
+    </body>
+</html>
