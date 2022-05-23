@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>circle animation</title>
+        <style>
+            ul{
+                list-style: none;
+                word-spacing: -10px;
+            }
+            ul li{
+                width: 20px;
+                height: 20px;
+                display: inline-block;
+                background: skyblue;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- junior canvas animation,my first test -->
+        <div>
+            <canvas id='circle'></canvas>
+            <video width="300px" height="300px"></video>
+            <ul>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+        <script>
+            let canvas = document.getElementById("circle");
+            canvas.width  = 200;
+            canvas.height = 200;
+            let ctx = canvas.getContext("2d");
+            let radius = 50;
+            let x=radius+Math.random()*(200-radius*2);
+            let y=radius+Math.random()*(200-radius*2);
+            //初始方向
+            let dx=(Math.random()-0.5)*4;
+            let dy=(Math.random()-0.5)*4;
+            function bounce(){
+                requestAnimationFrame(bounce);
+                ctx.clearRect(0,0,200,200);
+                if(x+radius > 200 || x-radius <0){
+                    dx=-dx;
+                }
+                if(y+radius > 200 || y-radius <0){
+                    dy=-dy;
+                }
+                x+=dx;
+                y+=dy;
+                ctx.beginPath();
+                ctx.style 
+                ctx.arc(x,y,radius,0,2*Math.PI,false);
+                ctx.stroke();
+            }
+            bounce();
+            console.log("webm?",MediaRecorder.isTypeSupported('video/webm;codecs=vp9')); //true
+            console.log("mp4?",MediaRecorder.isTypeSupported('video/mp4'));//false
+            var allChunks = [];
+            const stream2 = canvas.captureStream(60); // 60 FPS recording
+            const recorder = new MediaRecorder(stream2, {
+                mimeType: 'video/webm;codecs=vp9'
+            });
+            recorder.ondataavailable = e => {
+                console.log("TCL: e", e)
+                if(e.data.size){
+                    const link = document.createElement('a');
+                    link.style.display = 'none';
+                    console.log('download',e.data);
+                    var reader = new FileReader();
+                    reader.readAsArrayBuffer(e.data);
+                    reader.onload = function (e) {
+                        console.log(reader.result);
+                    }
+                    const downloadUrl = window.URL.createObjectURL(e.data);
+                    link.href = downloadUrl;
+                    link.download = `test${Math.random()}.webm`;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    window.URL.revokeObjectURL(downloadUrl);//回收内存
+                }
+                // allChunks.push(
+                //     e.data
+                // );
+            }
+            //end & download
+            function stopAndblobDownload() {
+                console.log('stop',recorder.requestData(),recorder.stop());
+                // setTimeout(()=>{//下载视频
+                //     const link = document.createElement('a');
+                //     link.style.display = 'none';
+                //     const fullBlob = new Blob(allChunks);
+                //     console.log('download',fullBlob);
+                //     const downloadUrl = window.URL.createObjectURL(fullBlob);
+                //     link.href = downloadUrl;
+                //     link.download = `test${Math.random()}.webm`;
+                //     document.body.appendChild(link);
+                //     link.click();
+                //     link.remove();
+                //     window.URL.revokeObjectURL(downloadUrl);//回收内存
+                // });
+            }
+            recorder.start();
+            setTimeout(()=>{
+                stopAndblobDownload();
+            },5000);
+            //调用系统摄像头
+            // var constraints={audio:true,video:{width:1280,height:720}};
+            // navigator.mediaDevices.getUserMedia(constraints)
+            // .then(function(mediaStream) {
+            //     var video = document.querySelector('video');
+            //     console.log(mediaStream);
+            //     video.srcObject = mediaStream;
+            //     video.onloadedmetadata = function(e) {
+            //         video.play();
+            //         console.log(e);
+            //     };
+            // })
+            // .catch(function(err) { console.log(err.name + ": " + err.message); });
+        </script>
+    </body>
+</html>

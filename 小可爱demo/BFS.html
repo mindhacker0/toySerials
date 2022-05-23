@@ -38,38 +38,24 @@
                     setTimeout(resolve,time);
                 });
             }
-            var exist =async function(board, word) {
-                let stack = [[0,0,0,false]];
-                let map = new Map;
-                let hasFind = false;
-                function findPath(x,y,findIndex,hasRight){
-                    if(x<0||x>2||y<0||y>3) return;
-                    if(!map.get(`${x},${y}`) || hasRight){
-                        document.querySelectorAll(".row")[x].querySelectorAll(".item")[y].classList.add("pass");
-                        if(board[x][y] === word[findIndex]){//找到匹配的了
-                            findIndex++;
-                            if(findIndex === word.length){
-                                hasFind = true;
-                                console.log("find");
-                            }
-                            hasRight = true;
-                        }else{
-                            hasRight = false;
-                            findIndex = 0;
-                        }
-                        stack.push([x+1,y,findIndex,hasRight]);
-                        stack.push([x,y+1,findIndex,hasRight]);
-                        stack.push([x-1,y,findIndex,hasRight]);
-                        stack.push([x,y-1,findIndex,hasRight]);
-                        map.set(`${x},${y}`,true);
+            var exist = function(board, word) {
+                if(board.length === 0) return false;
+                let height = board.length;
+                let width = board[0].length;
+                function dfs(x,y,findIndex){
+                    if(x<0||x>height||y<0||y>width) return;
+                    if(board[x][y] === word[findIndex]){
+                        findIndex++;
+                    }else{
+                        findIndex = 0;
                     }
+                    dfs(x+1,y,findIndex);
+                    dfs(x-1,y,findIndex);
+                    dfs(x,y+1,findIndex);
+                    dfs(x,y-1,findIndex);
                 }
-                while(stack.length>0){
-                    let [x,y,findIndex,hasRight] = stack.shift();
-                    findPath(x,y,findIndex,hasRight);
-                    await sleep(100);
-                }
-                return hasFind;
+                dfs(0,0,0)
+                return ;
             };
             renderToDom(testArr);
             exist(testArr,testStr);

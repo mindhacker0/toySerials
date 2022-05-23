@@ -1,0 +1,109 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script> -->
+        <!-- 引入element-ui样式 -->
+        <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+        <!-- 引入element-ui组件库 -->
+        <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    </head>
+    <body>
+        <div id="root">
+            <!-- 循环选择表单 -->
+            <div v-for="(item,index) in [province,city,blocks]" :key="index">
+                <el-select v-model="cascade[index]" @change="(val)=>changeSelect(val,item,index)">
+                    <el-option
+                      v-for="items in item"
+                      :key="items.value"
+                      :label="items.label"
+                      :value="items.value">
+                    </el-option>
+                </el-select>
+            </div>
+            <div>{{cascade}}</div>
+        </div>
+        <script>
+            new Vue({
+               el:"#root",
+               data(){
+                    return {
+                        //表格数据
+                        cascade:[],
+                        province:[],
+                        city:[],
+                        blocks:[]
+                    }
+               },
+               mounted(){
+                    this.province = [{//全国地区假数据
+                            value:1,
+                            label:"河北",
+                            children:[{
+                                value:11,
+                                label:"石家庄",
+                                children:[{
+                                    value:111,
+                                    label:"a街道",
+                                },{
+                                    value:112,
+                                    label:"b街道",
+                                }]
+                            },{
+                                value:12,
+                                label:"邢台",
+                                children:[{
+                                    value:121,
+                                    label:"c街道",
+                                },{
+                                    value:122,
+                                    label:"d街道",
+                                }]
+                            },]
+                        },{
+                            value:2,
+                            label:"山西",
+                            children:[{
+                                value:21,
+                                label:"大同",
+                                children:[{
+                                    value:211,
+                                    label:"e街道",
+                                },{
+                                    value:212,
+                                    label:"f街道",
+                                }]
+                            },{
+                                value:22,
+                                label:"太原",
+                                children:[{
+                                    value:221,
+                                    label:"g街道",
+                                },{
+                                    value:222,
+                                    label:"h街道",
+                                }]
+                            },]
+                        }]
+               },
+               methods:{
+                    changeSelect(val,item,now){
+                        console.log(val,item,now);//当前点击的节点数据
+                        let obj = item.find(({value})=>value===val);
+                        if(!obj) return;//异常
+                        if(now===0){//省变化处理
+                            this.city = obj.children||[];
+                            this.blocks = [];
+                            this.cascade[1] = "";
+                            this.cascade[2] = "";
+                        }
+                        if(now===1){//市变化处理
+                            this.blocks = obj.children||[];
+                            this.cascade[2] = "";
+                        }
+                    }
+               }
+            });
+        </script>
+    </body>
+</html>

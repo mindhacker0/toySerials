@@ -6,6 +6,42 @@
                 console.log(a,other);//999 {b: "000", c: "111"} other为余下的键值对组成的对象。
             }
             a({a:"999",b:"000",c:"111"});
+            let arr = [{
+                type:0,
+                children:[{
+                    type:0,
+                    children:[{
+                        type:1,
+                        children:[]
+                    },{
+                        type:0,
+                        children:[]
+                    },{
+                        type:1,
+                        children:[]
+                    }]
+                },{
+                    type:1,
+                    children:[{
+                        type:0,
+                        children:[]
+                    }]
+                }]
+            }];
+            function filter(list){
+                let arr = [];
+                for(let i = 0;i<list.length;i++){
+                    let item =JSON.parse(JSON.stringify(list[i]));
+                    if(item.type === 0){
+                        arr.push(item);
+                    }
+                    if(item.children.length){
+                        item.children = filter(item.children);
+                    }
+                }
+                return arr;
+            }
+            console.log(filter(arr));
         </script>
         <script>
             var b = {a:1,b:2};
