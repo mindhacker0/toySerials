@@ -1,0 +1,99 @@
+<html>
+    <head>
+        <style>
+            .message-box{
+                min-width:200px;
+                position: fixed;
+                top: 0px;
+                left: 50%;
+                border-radius: 6px;
+                transition:all ease-in .5s;
+                padding: 5px 10px;
+            }
+            .info-wrap{
+                color: #888;
+                background: #ccc;
+            }
+            .success-wrap{
+                color: #67c23a;
+                background-color:#f0f9eb;
+            }
+            .error-wrap{
+                color:red;
+                background-color:rgb(247, 223, 223);
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <button onclick="Message.info('ssss')">点击会有很多消息</button>
+            <button onclick="onceCall()">最多只有一条消息</button>
+        </div>
+        <script>
+            let once = false;
+            function onceCall(){
+                if(once === true) return;//已经点击过，无法再次触发
+                new Message({
+                    type:'success',
+                    msg:'点击了按钮'
+                });
+                once = true;//标记该函数已经触发，下次进来会被挡住
+                setTimeout(()=>{once = false},3000)
+            }
+            class Message{//构造一个消息的类
+                constructor(options){
+                    this.type = options.type || "info";
+                    this.msg = options.msg || "提示";
+                    this.instance = null;
+                    this.makeFrame();
+                }
+                makeFrame(){
+                    let elem = document.createElement('div');
+                    let messageList = Message.messageList;
+                    elem.style.top = `${-10+30*messageList.length}px`;
+                    elem.classList.add("message-box");
+                    elem.classList.add(`${this.type}-wrap`);
+                    elem.innerText = this.msg;
+                    document.body.appendChild(elem);
+                    this.instance = elem;
+                    setTimeout(()=>{
+                        elem.style.top = `${30*messageList.length}px`;
+                    });
+                    messageList.push(elem);
+                    this.removeMessage();
+                }
+                removeMessage(){//清除消息
+                    let messageList = Message.messageList;
+                    setTimeout(()=>{
+                        let rmElem = messageList.shift();
+                        document.body.removeChild(rmElem);
+                        if(messageList.length > 0){
+                            messageList.forEach((val)=>{
+                                val.style.top = `${val.offsetTop - 30}px`;
+                            })
+                        }
+                    },2700+messageList.length*300);
+                }
+                static messageList = []
+                static info(msg){
+                    new Message({
+                        type:'info',
+                        msg:msg
+                    });
+                }
+                static success(msg){
+                    new Message({
+                        type:'success',
+                        msg:msg
+                    });
+                }
+                static error(msg){
+                    new Message({
+                        type:'error',
+                        msg:msg
+                    });
+                }
+            }
+        </script>
+    </body>
+</html>

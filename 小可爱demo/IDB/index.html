@@ -1,0 +1,24 @@
+<html>
+    <head></head>
+    <body>
+        <script src="./index.js"></script>
+        <script>
+            console.log(indexedDB);
+            var idb = new IDB({
+                DBName:"test",
+                version:2,
+                tableList:[{
+                    tableName:"person"
+                }]
+            });
+            idb.openDB().then(vm=>{
+                //vm.db.createObjectStore("outer",{ autoIncrement: true });
+                vm.add("person",{id:'8887',name:"XXX",sex:Math.random()});
+                vm.read("person").then(res=>{
+                    // res.continue();
+                    console.log(res);
+                });
+            });
+        </script>
+    </body>
+</html>

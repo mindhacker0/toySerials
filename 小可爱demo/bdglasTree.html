@@ -1,0 +1,46 @@
+<html>
+    <body>
+        <canvas id="canvas"></canvas>
+        <script>
+            var canvas = document.getElementById("canvas");
+            var cavWidth = document.body.offsetWidth;
+            var cavHeight = document.body.offsetHeight||800;
+            canvas.setAttribute("width",cavWidth);
+            canvas.setAttribute("height",cavHeight);
+            var context = canvas.getContext("2d");
+            drawImg(context);
+            function sleep(time){
+                return new Promise(function(rs,rj){
+                    setTimeout(rs,time);
+                });
+            }
+            async function drawImg(cont){//默认的背景
+                cont.save();
+                cont.translate(800,500);
+                async function creat_rect(w){
+                    await sleep(1);
+                    cont.fillStyle="RGB(230,"+(200+parseInt(Math.random()*56))+","+(55+w*2)+")";
+                    cont.fillRect(0,0,w,w);
+                    if(w<2){return 0;}//宽度小于2像素停止
+                    //右边绘制
+                    cont.save();
+                    cont.rotate(37*2*Math.PI/360);
+                    cont.translate(0,-w/5*3-w/5*4);
+                    await creat_rect(w*4/5);
+                    cont.restore();       
+                    //左边绘制
+                    cont.save();
+                    cont.rotate(-53*2*Math.PI/360);
+                    cont.translate(0,-w/5*3);
+                    await creat_rect(w*3/5);
+                    cont.restore();          		      
+                }
+                await creat_rect(100);
+                console.log("done");//树绘制完成
+                cont.restore();
+                cont.clearRect(0,0,cavWidth,cavHeight);//清除区域内所有的东西，以便下次绘制
+                drawImg(cont);
+            }
+        </script>
+    </body>
+</html>

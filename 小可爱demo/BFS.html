@@ -1,0 +1,64 @@
+<html>
+    <head>
+        <style>
+            .item{
+                display: inline-block;
+                text-align: center;
+                width:50px;
+                height: 50px;
+                line-height: 50px;
+            }
+            .pass{
+                background:paleturquoise;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script>
+            let testArr = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]];
+            let testStr = "ABCCED";
+            function renderToDom(arr){
+                let wrap = document.createDocumentFragment();
+                for(let i in arr){
+                    let row = document.createElement("div");
+                    row.classList.add("row");
+                    for(let j in arr[i]){
+                       let elem = document.createElement("div");
+                       elem.classList.add("item");
+                       elem.innerText = arr[i][j];
+                       row.appendChild(elem);
+                    }
+                    wrap.appendChild(row);
+                }
+                document.getElementById("root").appendChild(wrap);
+            }
+            function sleep(time){
+                return new Promise((resolve,reject)=>{
+                    setTimeout(resolve,time);
+                });
+            }
+            var exist = function(board, word) {
+                if(board.length === 0) return false;
+                let height = board.length;
+                let width = board[0].length;
+                function dfs(x,y,findIndex){
+                    if(x<0||x>height||y<0||y>width) return;
+                    if(board[x][y] === word[findIndex]){
+                        findIndex++;
+                    }else{
+                        findIndex = 0;
+                    }
+                    dfs(x+1,y,findIndex);
+                    dfs(x-1,y,findIndex);
+                    dfs(x,y+1,findIndex);
+                    dfs(x,y-1,findIndex);
+                }
+                dfs(0,0,0)
+                return ;
+            };
+            renderToDom(testArr);
+            exist(testArr,testStr);
+        </script>
+    </body>
+</html>

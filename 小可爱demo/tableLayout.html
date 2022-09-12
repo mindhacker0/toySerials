@@ -1,0 +1,109 @@
+<html>
+    <head></head>
+    <style>
+        *{box-sizing: border-box;}
+        .wrap{
+            background: #39c3b9;
+            display: inline-block;
+            padding: 20px 10px 40px;
+        }
+        td,th{color: #fff;padding: 0 10px;line-height: 32px;text-align: center;}
+        th,td{
+            border-top: 2px solid #fff;
+            border-left: 2px solid #fff;
+        }
+        tr td{padding-bottom: 5px;padding-top: 5px;}
+        tr th:last-child{border-right: 2px solid #fff;}
+        tr td:last-child{border-right: 2px solid #fff;}
+        td input{
+            border: none;
+            outline: none;
+            background: transparent;
+        }
+        .endTable td{border-bottom: 2px solid #fff;}
+        .subhead{
+          display: flex;
+        }
+    </style>
+    <body>
+        <div class="wrap">
+            <div>
+                <table cellspacing="0">
+                    <tr>
+                        <th width="110px">职工代码</th>
+                        <th width="110px">姓名</th>
+                        <th width="334px">联系地址</th>
+                        <th width="140px">联系电话</th>
+                    </tr>
+                    <tr>
+                        <td><input style="width: 90px;"/></td>
+                        <td><input style="width: 90px;"/></td>
+                        <td><input style="width: 314px;"/></td>
+                        <td><input style="width: 120px;"/></td>
+                    </tr>
+                </table>
+                <table cellspacing="0">
+                    <tr>
+                        <th width="50px">住房</th>
+                        <th width="100px">地区</th>
+                        <th width="174px">街坊门号</th>
+                        <th width="50px">住层</th>
+                        <th width="50px">楼层</th>
+                        <th width="50px">间数</th>
+                        <th width="60px">使用面积</th>
+                        <th width="50px">客厅</th>
+                        <th width="50px">厨房</th>
+                        <th width="50px">厕所</th>
+                    </tr>
+                    <tr>
+                        <td>一</td>
+                        <td><input style="width: 80px;"/></td>
+                        <td><input style="width: 154px;"/></td>
+                        <td><input style="width: 30px;"/></td>
+                        <td><input style="width: 30px;"/></td>
+                        <td><input style="width: 30px;"/></td>
+                        <td><input style="width: 40px;"/></td>
+                        <td><input style="width: 30px;"/></td>
+                        <td><input style="width: 30px;"/></td>
+                        <td><input style="width: 30px;"/></td>
+                    </tr>
+                </table>
+                <table cellspacing="0">
+                    <tr>
+                        <th width="50px">要求</th>
+                        <th width="100px">地区</th>
+                        <th width="60px">街坊下限</th>
+                        <th width="60px">街坊上限</th>
+                        <th width="60px" colspan="2">
+                            住层
+                            <div class="subhead">
+                                <div style="width: 31px;border-right: 1px solid #fff;">上</div>
+                                <div style="width: 31px;border-left: 1px solid #fff;">下</div>
+                            </div>
+                        </th>
+                        <th width="50px">间数</th>
+                        <th width="60px">面积下限</th>
+                        <th width="60px">面积上限</th>
+                        <th width="50px">客厅</th>
+                        <th width="50px">厨房</th>
+                        <th width="50px">厕所</th>
+                    </tr>
+                    <tr class="endTable">
+                        <td>一</td>
+                        <td><input style="width: 80px;"/></td>
+                        <td><input style="width: 40px;"/></td>
+                        <td><input style="width: 40px;"/></td>
+                        <td><input style="width: 20px;"/></td>
+                        <td><input style="width: 20px;"/></td>
+                        <td><input style="width: 40px;" /></td>
+                        <td><input style="width: 40px;"/></td>
+                        <td><input style="width: 40px;"/></td>
+                        <td><input style="width: 30px;"/></td>
+                        <td><input style="width: 30px;"/></td>
+                        <td><input style="width: 30px;"/></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </body>
+</html>

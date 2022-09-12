@@ -1,0 +1,120 @@
+<html>
+<head>
+    <style>
+        .code-area{
+            padding: 4px;
+            margin: 0 auto;
+            width: 650px;
+            height: auto;
+            min-height: 96px;
+            background: #000;
+            border: 1px solid #ccc;
+            color: #fff;
+        }
+        .code-area span{
+            white-space: nowrap;
+        }
+        .keywords{
+            color: #c678dd;
+        }
+        .identifier{
+            color:#61aeee;
+        }
+        .white-space{
+           display: inline-block;
+           width: .5em;
+        }
+        .string-literal{
+            color: #d19a66;
+        }
+        .punctuator{
+            color: #fff;
+        }
+        .Constructors{
+            color: #98c379;
+        }
+        .Comments{
+           color:#5c6370;
+        }
+        .number-literal{
+            color: #98c379;
+        }
+    </style>
+</head>
+<body>
+<div class="code-area" id="textEl">
+function show(){//render board
+    let board=document.getElementById("board");
+    board.innerHTML="";
+    for(let i=0;i&lt;pattern.length;i++){
+        for(let j=0;j&lt;pattern[i].length;j++){
+            let cell=document.createElement("div");
+            cell.classList.add("cell");
+            cell.innerText=["","O","X"][pattern[i][j]];
+            cell.addEventListener("click",()=&gt;{move(i,j)})
+            board.appendChild(cell);
+        }
+        board.appendChild(document.createElement("br"))
+    }
+}
+/*
+* @param xregexp {string|regexp} 输入的要解析的自定义正则
+* @param name {string} 在集合中查找的子串
+*/
+function compileRegExp(xregexp,name){//编译正则
+    if(xregexp[name] instanceof RegExp) return  `(?<${name}>${xregexp[name].source})`;
+    let regexp = xregexp[name].replace(/\<([^>]+)\>/g,function(str,$1){
+        return compileRegExp(xregexp,$1);
+    });
+    return regexp;
+}
+let  compiledRegExp = compileRegExp(xregexp,"InputElement");
+let  lexerRegExp = new RegExp(compiledRegExp,"g");
+return lexerRegExp;
+</div>
+    <script src="./toyJs/regExpCompiler.js"></script>
+    <script src="./toyJs/lexer.js"></script>
+    <script src="./toyJs/SyntaxParser.js"></script>
+    <script>
+        //just identify token in codetext and high light them.
+        var elem = document.getElementById("textEl");
+        function makeTag(className,text){
+            let tagSpan = document.createElement("span");
+            tagSpan.className = className;
+            tagSpan.innerText = text;
+            return tagSpan;
+        }
+        let htmlText = elem.innerHTML.trim();
+        let fragement = document.createDocumentFragment();
+        scan(htmlText,(r)=>{//将捕获的命名分组替换为带颜色的span标签
+            let tag;
+            //console.log(r)
+            const {
+                WhiteSpace,
+                Comments,
+                Keywords,
+                Constructors,
+                Identifier,
+                LineTerminator,
+                Punctuator,
+                NumberLiteral,
+                StringLiteral
+            } =  r.groups;
+            switch(true){
+                case WhiteSpace!== undefined:tag=makeTag("white-space",WhiteSpace);break;
+                case Comments!== undefined:tag=makeTag("Comments",Comments);break;
+                case Keywords!== undefined:tag=makeTag("keywords",Keywords);break;
+                case Constructors!== undefined:tag=makeTag("Constructors",Constructors);break;
+                case Identifier!== undefined:tag=makeTag("identifier",Identifier);break;
+                case LineTerminator!== undefined:tag=makeTag("line-terminator",LineTerminator);break;
+                case Punctuator!== undefined:tag=makeTag("punctuator",Punctuator);break;
+                case NumberLiteral!== undefined:tag=makeTag("number-literal",NumberLiteral);break;
+                case StringLiteral!== undefined:tag=makeTag("string-literal",StringLiteral);break;
+            }
+            fragement.append(tag);
+        });
+        elem.innerHTML = '';
+        elem.append(fragement);
+    </script>
+</body>
+</html>

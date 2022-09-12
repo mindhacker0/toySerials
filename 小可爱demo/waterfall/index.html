@@ -1,0 +1,73 @@
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>瀑布流布局</title>
+        <style>
+            body{
+                padding: 0;
+                margin: 0;
+            }
+            .waterfall-wrap{
+                position: relative;
+            }
+            .card-item{
+                position: absolute;
+                border-radius: 6px;
+                opacity: .3;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <div class="waterfall-wrap" id="waterfall"></div>
+        </div>
+        <script type="text/javascript">
+            const cardWidth = 150;//每张卡片的宽度
+            const padding = 10;//卡片间距离
+            const container = document.getElementById("waterfall");
+            let bodyWidth = document.body.offsetWidth;//整个页面的宽度
+            let cardNum = ~~((bodyWidth+padding)/(cardWidth+padding));//计算能放卡片的数量 x*w + (x-1)*p = 
+            let cardList = makeCard();//制作卡片
+            let height = [];//保存卡片添加的高度
+            for(let i=0;i<cardNum;i++){
+                height.push({
+                    x:cardWidth*i+(i>0?padding*i:0),
+                    y:0,
+                });
+            }
+            while(cardList.length){putCard(cardList,height);}//放置卡片
+            function makeCard(){//制作随机高度的卡片
+                let arr = [];
+                for(let i=0;i<50;i++){
+                    arr.push({
+                        height:100+(~~(200*Math.random())),//卡片高度
+                        color:`rgb(${~~(256*Math.random())},${~~(256*Math.random())},${~~(256*Math.random())})`//卡片颜色
+                    });
+                }
+                return arr;
+            }
+            function putCard(list,height){//放置卡片
+                if(!height.length) return;
+                let card = list.shift();
+                let min=height[0].y,minIndex=0;
+                for(let i=0;i<height.length;i++){//计算最小的位置
+                    if(height[i].y<min){
+                        min = height[i].y;
+                        minIndex = i;
+                    }
+                }
+                let {x,y} = height[minIndex];//获取卡片的位置
+                let elem = document.createElement("div");
+                elem.classList.add("card-item");
+                elem.style.width = `${cardWidth}px`;
+                elem.style.height = `${card.height}px`;
+                elem.style.left = `${x}px`;
+                elem.style.top = `${y}px`;
+                elem.style.background = card.color;
+                container.appendChild(elem);
+                height[minIndex].y+=(card.height+padding);//放置完卡片后更新位置
+            }
+            console.log(height);
+        </script>
+    </body>
+</html>

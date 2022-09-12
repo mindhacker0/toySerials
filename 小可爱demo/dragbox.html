@@ -1,0 +1,118 @@
+<html>
+    <head></head>
+    <style>
+        .bg-item{
+            width: 200px;
+            height: 60px;
+            background: #ccc;
+        }
+        .item{
+            width: 200px;
+            height: 60px;
+            margin: 10px 0;
+            line-height: 60px;
+            background: #999;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+        }
+    </style>
+    <body>
+        <div id="box">
+            <div class="item"><span class="title">1</span><span>小</span></div>
+            <div class="item"><span class="title">2</span><span>可</span></div>
+            <div class="item"><span class="title">3</span><span>爱</span></div>
+        </div>
+        <script>
+            let parent =document.getElementById("box");
+            let items = document.getElementsByClassName("item");
+            let emptyElem = document.createElement("div"); 
+            emptyElem.classList.add("bg-item");
+            let position = [];
+            let direction = 0;
+            let emptyBox = null;//第几个元素是空元素
+            for(var i = 0; i < items.length; i++) {//遍历添加事件
+                let item = items[i];
+                position.push({left:item.offsetLeft,top:item.offsetTop,height:60,index:i});
+                begaindrag(item,i);
+			}
+            function begaindrag(elem,i){
+                let handleDown = null;
+                let handleMove = null;
+                let handleUp = null;
+                direction = 0;
+                elem.addEventListener("mousedown",handleDown = function(e) {
+                    let posx = e.pageX - elem.offsetLeft,posy = e.pageY - elem.offsetTop;
+                    document.body.addEventListener("mousemove",handleMove = function(e){
+                        let posx_new = e.pageX - posx;
+                        let posy_new = e.pageY - posy;
+                        elem.style.transform="rotate(30deg)";
+                        elem.style.position="absolute";
+                        elem.style.left = posx_new + "px";//使得被拖放元素跟随鼠标移动
+						elem.style.top = posy_new + "px";
+                        calcEmpty(e,i);
+                    });
+                    document.body.addEventListener("mouseup",handleUp = function(e){
+                        down(elem,i);
+                        emptyBox = null;
+                        document.body.removeEventListener("mousemove",handleMove);
+                        document.body.removeEventListener("mouseup",handleUp);
+                    });
+                });
+            }
+            function calcEmpty(e){//鼠标移动计算空出来的位置
+                let {pageY} = e;
+                for(let {top,height,index} of position){
+                    if(top < pageY && pageY < top+height){//高度在某个盒子范围内
+                        if(emptyBox === null){
+                            console.log("交换",index,null);
+                            if(index!==items.length-1){
+                                parent.insertBefore(emptyElem,items[index+1]);
+                            }else{
+                                parent.appendChild(emptyElem);
+                            }
+                            emptyBox = index+1;
+                        }else if(index!==(emptyBox-1)){
+                            if(index === emptyBox){index++;direction = -1;}
+                            console.log("交换",index,emptyBox);
+                            replaceChild(emptyBox,index);
+                            emptyBox = index;
+                        }
+                    }
+                }
+            }
+            function replaceChild(emptyIndex,index){//交换元素
+                let fragment = document.createDocumentFragment();
+                let items = parent.children;
+                let arr = []
+                let itemList = Array.prototype.slice.call(items);
+                for(let i =0;i<itemList.length;i++){
+                   arr.push(itemList[i]);
+                }
+                let temp = arr[emptyIndex];
+                arr[emptyIndex] = arr[index];
+                arr[index] = temp;
+                for(let i =0;i<arr.length;i++){
+                   fragment.appendChild(arr[i]);
+                }
+                parent.appendChild(fragment);
+            }
+            function down(elem,index){//鼠标抬起的处理
+                let fragment = document.createDocumentFragment();
+                let items = parent.children;
+                elem.removeAttribute("style");
+                Array.prototype.slice.call(items).forEach((v,i) => {
+                    if(i===emptyBox){
+                        fragment.appendChild(elem);
+                    }
+                    fragment.appendChild(v);
+                });
+                emptyElem.remove();
+                for(let i =0;i<fragment.children.length;i++){
+                    fragment.children[i].getElementsByClassName("title")[0].innerText = i+1;
+                }
+                parent.appendChild(fragment);
+            }
+        </script>
+    </body>
+</html>

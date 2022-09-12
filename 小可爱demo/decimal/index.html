@@ -1,0 +1,99 @@
+<html>
+
+<head>
+    <style>
+        .sample-item{
+            display: flex;
+            align-items: center;
+        }
+        .state-wrap{
+            font-size: 0;
+        }
+        .sample{
+            width: 1em;
+            height: 1em;
+        }
+        .boolean{
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            display: inline-block;
+            color: #fff;
+            border: 1px solid #000;
+            font-size: 16px;
+        }
+        .sign{
+            background: rgba(255, 0, 0, .8)
+        }
+        .exponent{
+            background: rgba(0, 255, 0, .8);
+        }
+        .fraction{
+            background: rgba(0, 0, 255, .8);
+        }
+    </style>
+    <script src="decimal.js" type="text/javascript" charset="utf-8"></script>
+</head>
+
+<body>
+    <div>
+        <p>演示小数在内存的存储</p>
+        <div><span>数值:</span><input id="number"/></div>
+        <div>
+            <div class="sample-item"><div class="sample sign"></div><span>:符号位</span></div>
+            <div class="sample-item"><div class="sample exponent"></div><span>:指数位</span></div>
+            <div class="sample-item"><div class="sample fraction"></div><span>:小数位</span></div>
+        </div>
+        <div class="state-wrap">
+            <div class="boolean sign">0</div>
+            <div class="boolean exponent">0</div>
+            <div class="boolean exponent">0</div>
+            <div class="boolean exponent">0</div>
+            <div class="boolean exponent">0</div>
+            <div class="boolean exponent">0</div>
+            <div class="boolean exponent">0</div>
+            <div class="boolean exponent">0</div>
+            <div class="boolean exponent">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+            <div class="boolean fraction">0</div>
+        </div>
+        <div>
+            
+        </div>
+    </div>
+    <script>
+        let input = document.getElementById("number");
+        input.onchange = function(e){
+            const value = e.target.value;
+            if(isNaN(Number(value))){console.error("NaN");return;}
+            renderBoolean(Number(value));
+        }
+        function renderBoolean(num){//把值转化为bool形式
+             
+        }
+    </script>
+</body>
+
+</html>

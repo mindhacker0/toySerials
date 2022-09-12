@@ -1,0 +1,61 @@
+<html>
+    <head></head>
+    <body>
+        <script>
+            let vue = {
+                data:{a:1,b:2},
+                props:{c:3},
+                computed:{
+                    getIndex(){
+                        return vue.data.a + vue.data.b;
+                    },
+                    getName(){
+                        return function(index){
+                            if(index === 1){
+                                return "小白"
+                            }
+                            if(index === 2){
+                                return "小黑"
+                            }
+                        }
+                    }
+                },
+                methods:{
+                    printAll(){
+                        return vue.data;
+                    },
+                    printName(a,b){
+                        return a+b;
+                    }
+                }
+            };
+            //vue 在解析{{key}}中的变量，通过this[key]去查找
+            function resolveVarious(key,...params){//解析变量key
+                //一般会在vue的属性中找该变量，比如说"data","props","computed","methods"
+                for(let attr in vue){//便历每个vue属性
+                    for(let keys in vue[attr]){//便历属性中的键值
+                        if(keys === key){//能找到该键名
+                            if(typeof vue[attr][key] === "function"){//如果该键对应的值是函数就调用
+                                if(attr === "computed"){
+                                    if(typeof vue[attr][key]() === "function")
+                                        return vue[attr][key]()(...params);
+                                    else
+                                        return vue[attr][key]();
+                                }
+                                return vue[attr][key](...params);//带参数
+                            }else{//如果是普通变量直接返回
+                                return vue[attr][key];
+                            }
+                        }
+                    }
+                }
+                console.error(key +" is not defined");
+            }
+            console.log(resolveVarious("a"));//相当于{{a}}
+            console.log(resolveVarious("printAll"));//相当于{{printAll()}}
+            console.log(resolveVarious("getName",1))//相当于{{getName(1)}}
+            console.log(resolveVarious("getIndex"))//相当于{{getIndex}}
+            console.log(resolveVarious("printName","小白","最可爱"))//相当于{{printName("小白","最可爱")}}
+        </script>
+    </body>
+</html>

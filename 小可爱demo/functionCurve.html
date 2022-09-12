@@ -1,0 +1,84 @@
+<html>
+    <head>
+        <style>
+            #canvas{width:100%;height: 100%;}
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+        <script>
+            var canvas = document.getElementById("canvas");
+            var cavWidth = document.body.offsetWidth;
+            var cavHeight = document.body.offsetHeight||800;
+            canvas.setAttribute("width",cavWidth);
+            canvas.setAttribute("height",cavHeight);
+            var context = canvas.getContext("2d");
+            function sleep(time){
+                return new Promise(function(rs,rj){
+                    setTimeout(rs,time);
+                });
+            }
+            const MAX_X = 10;//x轴的最大值
+            const X_SIZE = 10;//x轴的刻度距离
+            const Y_SIZE = 10;//y轴的刻度距离
+            const LEFT_W = 20;
+            const BOTTOM_H = 20;
+            function drawFn(ctx,fn){
+                let prev = [0,fn(0)];
+                for(let i=1;i<MAX_X;i++){
+                    ctx.beginPath();
+                    let now = fn(i);
+                    console.log(prev,[i,now])
+                    ctx.moveTo(LEFT_W+(prev[0])*X_SIZE+0.5,cavHeight-BOTTOM_H - (prev[1]*Y_SIZE));
+                    ctx.lineTo(LEFT_W+(i)*X_SIZE+0.5,cavHeight-BOTTOM_H - (now*Y_SIZE));
+                    ctx.lineWidth =1;
+                    ctx.stroke();
+                    prev = [i,now];
+                }
+            }
+            async function drawImg(ctx){
+                {//x轴
+                    ctx.beginPath();
+                    ctx.moveTo(LEFT_W,cavHeight-BOTTOM_H+0.5);
+                    ctx.lineTo(cavWidth,cavHeight-BOTTOM_H+0.5);
+                    ctx.lineWidth =1;
+                    ctx.stroke();
+                }
+                {//y轴
+                    ctx.beginPath();
+                    ctx.moveTo(LEFT_W+0.5,cavHeight-BOTTOM_H+0.5);
+                    ctx.lineTo(LEFT_W+0.5,0);
+                    ctx.lineWidth =1;
+                    ctx.stroke();
+                }
+                let xNum = ~~(cavWidth/X_SIZE);
+                for(let i=0;i<xNum;i++){
+                    if(i===0) continue;
+                    ctx.beginPath();
+                    ctx.moveTo(LEFT_W+i*X_SIZE+0.5,cavHeight-BOTTOM_H-0);
+                    ctx.lineTo(LEFT_W+i*X_SIZE+0.5,cavHeight-BOTTOM_H-4);
+                    ctx.lineWidth =1;
+                    ctx.stroke(); 
+                }
+                function curve(x){//定义n!函数
+                    if(x===0) return 0;
+                    let result = 1;
+                    for(let i=1;i<=x;i++){
+                        result*=i;
+                    }
+                    return result;
+                }
+                function curve1(x){//定义n*2**n函数
+                    return x*2**x;
+                }
+                function curve2(x){//定义y=x函数
+                    return x;
+                }
+                drawFn(ctx,curve);
+                drawFn(ctx,curve1);
+                drawFn(ctx,curve2);
+            }
+            drawImg(context);
+        </script>
+    </body>
+</html>

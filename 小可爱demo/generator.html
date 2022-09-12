@@ -1,0 +1,36 @@
+<html>
+    <head></head>
+    <body>
+        <script>
+            //generator 是一种遍历器，建立generator函数后通过next一个接一个访问，保证了访问次序
+            function request(name){//用setTimeOut模拟请求接口
+                return new Promise(function(resolve,reject){//接口一般是用promise来处理异步请求，then获取结果
+                    setTimeout(function(){
+                        resolve(name);
+                    },2000);
+                });
+            }
+            //创建generator函数使用function*
+            //函数里面的迭代用yield
+            function* getAll(){
+                yield request(1);
+                yield request(2);
+                yield request(3);
+                yield {console}
+                return 4;
+            }
+            var fn = getAll();//建立一个generator的实例
+            console.log("fn",fn);
+            var next = fn.next();//通过next依次遍历yield
+            while(next.done===false){//done是TRUE表示遍历完成
+                let value = next.value;//value是执行yield后面语句的结果
+                console.log("遍历",value);
+                value.then(function(res){
+                   console.log(res);
+                });
+                next = fn.next();
+            }
+            console.log(next);//{value: 4, done: true}
+        </script>
+    </body>
+</html>

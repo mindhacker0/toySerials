@@ -1,0 +1,43 @@
+<html>
+    <head></head>
+    <body>
+        <script>
+            //可选链
+            var a = {b:999};
+            //console.log(a.c.name);//如果想访问a.c.name会报错 can't read name of undefined 因为a.c的值是undefined
+            //如果想要安全访问a.c.name
+            console.log(a.c && a.c.name);//&&布尔逻辑如果第一个值(a.c)为false,就不会执行第二个值(a.c.name)了，因为有一个为false就能判断整个语句为false,不会傻傻去看第二条
+            //可选链来简化上面的写法
+            console.log(a.c?.name);//目的是即使?.前面的值(a.c)是undefined，也使得访问它的属性(.name)不报错
+        </script>
+        <script>
+            //空值合并
+            //有时我们会给一个备胎来保证假使没有这个东西，会使用备胎
+            var b = "";
+            var a = b || "备胎";
+            //b的值为空字符串，转化为布尔类型是FALSE就会执行后面的值("备胎")。
+            //但是若b的值转化为布尔是TRUE就没有备胎什么事了，因为对于||布尔逻辑，有一个为真就会整条语句为真。遇到第一条语句(b)是真爱就不会笨笨的还去看"备胎"
+            console.log(a);//备胎
+            var c = "真爱";
+            var d = c || "备胎";
+            console.log(d);//真爱
+            //同样的使用场景
+            function aa(name){
+               return name || "小黑";
+            }
+            console.log(aa());//小黑
+            console.log(aa(""));//小黑
+            console.log(aa(0));//小黑
+            console.log(aa("小明"));//小明
+            //但是上面的做法有一个问题，我使用aa("")就想打印""，不想打印小黑
+            //那么就有解决办法??目的是只有null和undefined才会执行第二条语句，其它的比如空字符串啊0啊都会执行第一条语句，即使它们的布尔值是FALSE
+            function bb(name){
+               return name ?? "小黑";
+            }
+            console.log(bb());//小黑
+            console.log(bb(""));//""空字符串
+            console.log(bb(0));//0
+            console.log(bb("小明"));//小明
+        </script>
+    </body>
+</html>
