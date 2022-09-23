@@ -2,6 +2,7 @@
     <div>
         <div>
             <div @click="goto(`/dynamic-form`)"><span>动态渲染表单</span></div>
+            <div @click="goto(`/gao-de`)"><span>高德地图</span></div>
         </div>
     </div>
 </template>
