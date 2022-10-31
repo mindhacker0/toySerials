@@ -1,15 +1,15 @@
 {
-  "name": "toy-vue",
+  "name": "websocket",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev:test": "node ./toy-vue.js"
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "gojs": "^2.2.15"
+  "dependencies": {
+    "express": "^4.18.1"
   }
 }

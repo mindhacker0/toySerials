@@ -1,0 +1,36 @@
+<html>
+    <head></head>
+    <body>
+        <div id="name"></div><input id="stext"/>
+        <button onclick="sendMsg()">发送</button>
+        <div id="showMsg"></div>
+    </body>
+    <script>
+        let elem = document.getElementById("showMsg");
+        let input = document.getElementById("stext");
+        let handleSocket = new WebSocket("ws://localhost:8888");
+        let usrName = (Math.random()*10e9|0).toString();
+        document.getElementById("name").innerText = `你的ID是${usrName}:`;
+        handleSocket.onopen = function(){
+            //已经连接到服务端了
+        }
+        handleSocket.onmessage = function(event){
+            //用户接收服务端的推送消息
+            let magList = JSON.parse(event.data);
+            console.log(magList);
+            let str = "";
+            magList.forEach(val => {
+                str+=`${val.usrName}:${val.msg}`;
+                str+="\n";
+            });
+            elem.innerText = str;
+        }
+        handleSocket.onclose = function(){ 
+            // 关闭 websocket
+            console.log("连接已关闭..."); 
+        };
+        function sendMsg(){//当前用户发送消息
+            handleSocket.send(JSON.stringify({usrName,msg:input.value}));
+        }
+    </script>
+</html>
