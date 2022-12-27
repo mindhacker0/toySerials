@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            #mycavs{
+                background: #000;
+                background: url("assets/webgl9p.png");
+                background-size: cover;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <canvas width="300" height="300" id="mycavs"></canvas>
+        </div>
+        <script>
+            let cavs = document.getElementById("mycavs");
+            let ctx = cavs.getContext("2d");
+            ctx.fillStyle="#ccc";
+            ctx.fillRect(50,50,200,200);
+        </script>
+    </body>
+</html>
