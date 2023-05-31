@@ -1,10 +1,21 @@
 <html>
-    <head></head>
+    <head>
+        <script src="https://unpkg.com/vue@next"></script>
+    </head>
     <body>
-        <div id="app">{{message}}</div>
+        <div id="app">{{title}}<hcs>{{jjc}}</hcs></div>
     </body>
     <script type="module">
-        import {ToyVue as Vue} from "./toy-vue.js";
-        
+        const {createApp,ref,reactive} = Vue;
+        const app = {
+            setup(){
+                const title = ref("0000");
+                const obj = reactive({
+                    name:"999"
+                });
+                return {title,obj};
+            }
+        };
+        createApp(app).component("hcs",{setup(){return {jjc:ref("888")}}}).mount("#app");
     </script>
 </html>

@@ -1,5 +1,6 @@
 <template>
     <div>
+        <Bar @hhc="revie"></Bar>
         <a-form-model layout="inline"
                       :form="formData"
                       @submit="handleSubmit">
@@ -22,6 +23,7 @@
 
 <script>
 import Vue from "vue";
+import Bar from "./bar.vue";
 const dselect = Vue.component("d-select", {
     props: ["datalist", "value", "placeholder"],
     data() {
@@ -49,7 +51,7 @@ const dselect = Vue.component("d-select", {
     </a-select>`,
 });
 export default {
-    components: {},
+    components: {Bar},
     computed: {},
     data() {
         return {
@@ -159,6 +161,9 @@ export default {
                 }
             });
         },
+        revie(){
+            console.log("parent reive");
+        }
     },
     watch: {},
 };
