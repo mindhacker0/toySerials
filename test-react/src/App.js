@@ -1,17 +1,16 @@
-import './App.css';
-import ActionBar from './components/actionBar';
-import {ThemeContext} from "./context.js"
-function App() {
+import {ThemeContext} from "./context.js";
+import {compose} from "redux";
+import AppStoreHoc from "./libs/store.hoc.js";
+import RouteWrapper from "./router";
+function App(props) {
   //const logProfiler = (...attrs)=>{console.log(attrs)}
   return (
     <div className="App">
       <ThemeContext.Provider value={{name:"9990"}}>
-        <ActionBar id="888">
-          <div>ooo</div>
-        </ActionBar>
+        <RouteWrapper {...props}/>
       </ThemeContext.Provider>
     </div>
   );
 }
 
-export default App;
+export default compose(AppStoreHoc)(App);

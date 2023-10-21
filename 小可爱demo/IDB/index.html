@@ -1,6 +1,5 @@
 <html>
-    <head></head>
-    <body>
+    <head>
         <script src="./index.js"></script>
         <script>
             console.log(indexedDB);
@@ -20,5 +19,73 @@
                 });
             });
         </script>
+        <style>
+            #content{
+                width: 400px;
+                height: 400px;
+                background: paleturquoise;
+                position: relative;
+            }
+            #dragPanel{
+                width: 20px;
+                height: 20px;
+                background: red;
+                position: absolute;
+                left: 10px;
+            }
+        </style>
+    </head>
+    <body>
+       <div id="xxx">click me</div>
+       <div id = 'content'>
+          <div id ='dragPanel'></div>
+       </div>
+       <script>
+            let elem = document.getElementById("xxx");
+            elem.addEventListener("click",()=>{console.log("onclick 2");})
+            elem.onclick = ()=>{console.log("onclick 1");}   
+            const parent = document.getElementById("content");
+            const dragElem = document.getElementById("dragPanel");
+            let handleDrag = null,startPos = null,cancelPos = null; 
+            let startx = null,starty = null;//鼠标位置
+            document.body.addEventListener("mousedown",(e)=>{
+                startx = e.clientX;
+                starty = e.clientY;
+            });
+            let dragFn  = (e)=>{
+                let posx = e.target.offsetLeft,posy = e.target.offsetTop;//元素起始位置
+                startPos = {x:posx,y:posy};
+                cancelPos = {x:posx,y:posy};
+                handleDrag = (e)=>{
+                    console.log(startx)
+                    let afterx = e.clientX,aftery = e.clientY;//鼠标移动后的位置
+                    let nextLeft = startPos.x + afterx - startx;//当前元素水平位置（元素之前位置+鼠标水平的偏移量）
+                    let nextTop = startPos.y + aftery - starty;//当前元素垂直位置（元素之前位置+鼠标垂直的偏移量）
+                    nextLeft = nextLeft>380?380:nextLeft<0?0:nextLeft;
+                    nextTop = nextTop>380?380:nextTop<0?0:nextTop;
+                    dragElem.style.left = `${nextLeft}px`;
+                    dragElem.style.top = `${nextTop}px`;
+                    startPos.x = nextLeft,startPos.y = nextTop;//更新元素的当前位置
+                    startx = afterx,starty = aftery;//更新鼠标的当前位置
+                };
+                document.body.addEventListener("mousemove",handleDrag);
+                let oneOf =  true;
+                document.body.addEventListener("mouseout",()=>{
+                    if(oneOf){
+                        document.body.removeEventListener("mousemove",handleDrag);
+                        startx = null,starty = null;
+                        oneOf = false;
+                    }
+                });
+                document.body.addEventListener("mouseup",()=>{//拖拽完成
+                    if(oneOf){
+                        document.body.removeEventListener("mousemove",handleDrag);
+                        startx = null,starty = null;
+                        oneOf = false;
+                    }
+                });
+            };
+            dragElem.addEventListener("mousedown",dragFn)
+       </script>
     </body>
 </html>

@@ -5,19 +5,22 @@ import {RouterLink,RouterView} from "vue-router";
 let pid = ref("999");//简单类型双向绑定
 let obj = reactive({
   name:"xiaoming",
-  age:18
+  age:18,
+  arr:[{name:"000"}]
 });//复合类型双向绑定
 const changeName = ()=>{
   obj.name = "小红";
   pid.value--;//函数内部对于简单类型要用value访问
 };//定义事件
-console.log(pid)
+console.log(pid,obj.arr)
 provide("otherid",pid);//提供变量注入
 </script>
 
 <template>
   <div>
-    <HelloWorldVue :id="pid" :info="obj"/>
+    <HelloWorldVue :id="pid" :info="obj">
+      <template #content><div>jsu</div></template>
+    </HelloWorldVue>
     <button @click="++pid">add</button>
     <button @click="changeName">other</button>
     <div>{{obj.name}}</div>

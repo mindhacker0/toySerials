@@ -141,7 +141,7 @@ executor: new Promise的时候立即执行，接收两个参数resolve
 
 promise状态流转 pending => rejected、 pending =>fullfilled
 * 3. promise的返回值？
-then方法：接收onFullfilled和onRejected
+then方法：接收onFullfilled和onRejected 
 如果then时，promise已经成功，执行onFullfilled,参数value
 如果then时，promise已经成功，执行onRejected,reason
 
