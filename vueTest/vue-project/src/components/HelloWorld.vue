@@ -19,7 +19,7 @@ console.log(props,slots);
 watch(oid,(val)=>console.log('oid',val));
 const cav = ref(null);
 const range = ref(0);
-const vector = [[3,0,-3],[3,100,-3]];
+const vector = [[10,10,-100],[10,100,-100]];
 onMounted(()=>{
   console.log(cav.value);
   draw();
@@ -35,16 +35,25 @@ function vMuti(vec,muti){
   let [x,y,z] = vec;
   return [x*muti,y*muti,z*muti];
 }
-function draw(){
+// 画布坐标系
+// 相机坐标 z轴朝外，y向上，x向右
+// 画布坐标系，z轴向里，y向下,x向右
+const coordinate = [// 所得坐标系转换矩阵
+[ 1, 0, 0,0],
+[ 0,-1, 0,200],
+[ 0, 0,-1,0],
+[ 0, 0, 0,1]
+];
+function draw(){//绘制前要转化为画布的坐标
   let ctx = cav.value.getContext('2d');
   ctx.clearRect(0, 0, 200, 200)
   ctx.beginPath();
-  transVector(vector);
-  console.log(vector)
-  for(let i=0;i<vector.length;++i){
-    let [x,y,z] = vector[i];
-    if(i===0) ctx.moveTo(x,y);
-    else ctx.lineTo(x,y);
+  let transVect =  transVector(vector);
+  for(let i=0;i<transVect.length;++i){
+    let [x,y,z] = transVect[i];
+    let [[dx],[dy],[dz]] = mtxMuti(coordinate,[[x],[y],[z],[1]]);
+    if(i===0) ctx.moveTo(dx,dy);
+    else ctx.lineTo(dx,dy);
   }
   ctx.stroke();
   ctx.closePath();
@@ -66,29 +75,42 @@ function mtxMuti(arr,arr1){
   }
   return result;
 }
-console.log(mtxMuti([[1,2]],[[2],[1]]))
 function transVector(vector){
-  let angle = 3.6*range.value;
-  let rotateMtx = [
-    [Math.cos(angle),Math.sin(angle),0,0],
-    [-Math.sin(angle),Math.cos(angle),0,0],
+  let angle = -2*Math.PI*Number(range.value)/400;//反方向旋转
+  let rotateXMtx = [//x轴旋转矩阵
+    [1,0,0,0],
+    [0,Math.cos(angle),Math.sin(angle),0],
+    [0,-Math.sin(angle),Math.cos(angle),0],
+    [0,0,0,1]
+  ];
+  let rotateYMtx = [//y轴旋转公式
+    [Math.cos(angle),0,Math.sin(angle),0],
+    [0,1,0,0],
+    [-Math.sin(angle),0,Math.cos(angle),0],
+    [0,0,0,1]
+  ];
+  let rotateZMtx = [//z轴旋转公式
+    [Math.cos(angle),-Math.sin(angle),0,0],
+    [Math.sin(angle),Math.cos(angle),0,0],
     [0,0,1,0],
     [0,0,0,1]
   ];
+  let result = [];
   for(let i=0;i<vector.length;++i){
     let [x,y,z] = vector[i];
     let len = vlen(vector[i]);
-    const [[dx],[dy],[dz]] = mtxMuti(rotateMtx,[[x/len],[y/len],[z/len],[1]])
-    vector[i] = vMuti([dx,dy,dz],len);
+    const [[dx],[dy],[dz]] = mtxMuti(rotateXMtx,[[len==0?0:x/len],[len==0?0:y/len],[len==0?0:z/len],[1]])
+    result[i] = vMuti([dx,dy,dz],len);
   }
-  console.log(vector);
+  console.log(result);
+  return result;
 }
 </script>
 
 <template>
   <div class="greetings">
       {{sid}}
-      <canvas ref='cav' width="200" height="200"></canvas>
+      <canvas ref='cav' width="200" height="200" style="border: 1px solid #888;"></canvas>
       <input type='range' v-model="range" />
   </div>
 </template>
