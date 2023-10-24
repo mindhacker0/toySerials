@@ -1,18 +1,17 @@
 import {createRouter,createWebHistory} from "vue-router";
-import PageOne from "./components/pageOne.vue";
-import PageTwo from "./components/pageTwo.vue";
+import lineView from "@/views/lineView/index.vue";
+import ProjectionView from "@/views/projectionView/index.vue";
 const router = createRouter({
     history:createWebHistory(import.meta.env.BASE_URl),
     routes:[
         {
-            path:"/one",
-            name:"page-one",
-            component:PageOne
-        },
-        {
-            path:"/two",
-            name:"page-two",
-            component:PageTwo
+            path:"/polygon",
+            name:"lineView",
+            component:lineView
+        },{
+            path:"/projection",
+            name:"projection",
+            component:ProjectionView
         }
     ]
 })
