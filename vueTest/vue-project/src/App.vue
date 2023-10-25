@@ -8,7 +8,8 @@ import {RouterLink,RouterView} from "vue-router";
     <div>
       <div class="nav-menu">
         <div class="menu-item"><RouterLink to="/polygon">多边形</RouterLink></div>
-        <div class="menu-item"><RouterLink to="/projection">透视投影</RouterLink></div> 
+        <div class="menu-item"><RouterLink to="/projection">投影变换</RouterLink></div> 
+        <div class="menu-item"><RouterLink to="/picture-operation">图像处理</RouterLink></div>
       </div>
       <div>
         <RouterView />
