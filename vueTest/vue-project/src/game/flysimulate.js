@@ -4,7 +4,8 @@ export const useProjection = ()=>{//透视投影
     const viewRef = ref(null);
     let context = null;
     const viewPort = reactive({w:1280,h:720});//视口的大小
-    const angle = reactive({x:0,y:0,z:0});//旋转角度
+    const angle = reactive({x:0,y:0,z:0});//正方体旋转角度
+    const cameraAngle = reactive({x:0,y:0,z:0});//相机的旋转角度
     const world = new Matrix([
         [1,0,0,0],
         [0,1,0,0],
@@ -33,13 +34,23 @@ export const useProjection = ()=>{//透视投影
         [100,-100,100],        
         [-100,-100,100]
     ];//定义一个矩形的顶点
-    const transw_c = camera.muti(world.inverse());//世界坐标转为相机坐标
-    transw_c.mtx[0][3] = viewPort.w/2;
-    transw_c.mtx[1][3] = viewPort.h/2;
-    const transc_v = drawCoordinate.muti(camera.inverse());//相机坐标转为canvas绘图坐标
-    transc_v.mtx[1][3] = viewPort.h;
-    // console.log(transc_v.muti(new Matrix([[1],[1],[-1],[1]])));//测试变换矩阵
-    function pixelTrans(point){//坐标变换
+    function worldAuxiliary(fnTransVec){//世界辅助线
+        let  rx = [[-100,0,0],[100,0,0]],ry = [[0,-100,0],[0,100,0]],rz = [[0,0,-100],[0,0,100]];
+        //坐标轴辅助线
+        
+    }
+    function coordinateTransform(){//计算坐标系的变换矩阵
+        const rotate_ca = rotateTransform(cameraAngle);
+        const trans_ca = rotate_ca.muti(camera);//事实上乘以camera坐标矩阵的转置，因为是对角阵，不需要这步操作
+        const transw_c = trans_ca.muti(world.inverse());//世界坐标转为相机坐标
+        transw_c.mtx[0][3] = viewPort.w/2;
+        transw_c.mtx[1][3] = viewPort.h/2;
+        transw_c.mtx[2][3] = -100;
+        const transc_v = drawCoordinate.muti(trans_ca.inverse());//相机坐标转为canvas绘图坐标
+        transc_v.mtx[1][3] = viewPort.h;
+        return transc_v.muti(transw_c);
+    }
+    function rotateTransform(angle){//物体的旋转变换矩阵
         let anglex = Math.PI*Number(angle.x)/180;
         let angley = Math.PI*Number(angle.y)/180;
         let anglez = Math.PI*Number(angle.z)/180;
@@ -62,28 +73,31 @@ export const useProjection = ()=>{//透视投影
             [0,0,1,0],
             [0,0,0,1]
         ]);
+        let rotateMtx = rotateYMtx.muti(rotateXMtx);
+        rotateMtx = rotateZMtx.muti(rotateMtx);
+        return rotateMtx;
+    }
+    function pixelTrans(point,coordinateMtx){//坐标变换
+        const rotateMtx = rotateTransform(angle);
         const [x,y,z,len] = toIdentityVec(point);
         let colVec = new Matrix([[x],[y],[z],[1]]);
-        colVec = rotateXMtx.muti(colVec);
-        colVec = rotateYMtx.muti(colVec);
-        colVec = rotateZMtx.muti(colVec);
+        colVec = rotateMtx.muti(colVec);
         colVec.numMuti(len);
         colVec.mtx[3][0] = 1;
-        // for(let i=0;i<3;++i) point[i] = colVec.mtx[i][0];
         //坐标系变换
-        colVec = transw_c.muti(colVec);
-        colVec = transc_v.muti(colVec);
+        colVec = coordinateMtx.muti(colVec);
         return colVec.mtx; 
     }
     const render = ()=>{
         context.clearRect(0, 0, viewPort.w, viewPort.h);
-        context.beginPath();
+        const transCnMtx = coordinateTransform();
         //顶点变换
-        //绘制图形，连线
         let tranVecs = [];
         for(let i=0;i<rect.length;++i){
-            tranVecs.push(pixelTrans(rect[i]));
+            tranVecs.push(pixelTrans(rect[i],transCnMtx));
         }
+        context.beginPath();
+        //绘制图形，连线
         for(let i=0;i<=4;++i){//上平面
             const [[dx],[dy],[dz]] = tranVecs[i%4];
             if(i===0) context.moveTo(dx,dy);
@@ -153,7 +167,7 @@ export const useProjection = ()=>{//透视投影
     onMounted(()=>{
         initScreen();
         render();
-        play();
+        // play();
     });
     onUnmounted(()=>{
         cancelAnimationFrame(handlePlay.value);

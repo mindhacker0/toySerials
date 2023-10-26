@@ -1,6 +1,6 @@
 <script setup>
 import { usePicture } from './usePicture';
-const {screenRef,selectFile} = usePicture();
+const {screenRef,selectFile,saveWorkFile} = usePicture();
 </script>
 <template>
     <div>
@@ -9,6 +9,7 @@ const {screenRef,selectFile} = usePicture();
         </div>
         <div>
             <button @click="selectFile">文件选择</button>
+            <button @click="saveWorkFile">保存</button>
         </div>
     </div>
 </template>
