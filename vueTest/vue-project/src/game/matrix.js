@@ -25,6 +25,16 @@ class Matrix{//矩阵
         this.w = 0;
         if(arr) this.init(arr);
     }
+    deepCopy(){
+        let result = [];
+        for(let i=0;i<this.h;++i){
+            result[i] = [];
+            for(let j=0;j<this.w;++j){
+                result[i][j] = this.mtx[i][j];
+            }
+        }
+        return new this.constructor(result);
+    }
     init(arr){//初始化 深拷贝
         let isSynmmetry = true;//是否为对称矩阵
         this.h = arr.length,this.w = arr[0].length;
@@ -37,12 +47,26 @@ class Matrix{//矩阵
         }
         return {isSynmmetry};
     }
-    numMuti(n){
+    numMuti(n){//数乘
+        let result = [];
         for(let i=0;i<this.h;++i){
+            result[i] = [];
             for(let j=0;j<this.w;++j){
-                this.mtx[i][j] = n*this.mtx[i][j];
+                result[i][j] = n*this.mtx[i][j];
             }
         }
+        return new this.constructor(result);
+    }
+    add(cmtx){//矩阵加法
+        if(!cmtx instanceof Matrix||this.w!==cmtx.w||this.h!==cmtx.h) return null;
+        let result = [];
+        for(let i=0;i<this.h;++i){
+            result[i] = [];
+            for(let j=0;j<this.w;++j){
+                result[i][j] = this.mtx[i][j]+cmtx.mtx[i][j];
+            }
+        }
+        return new this.constructor(result);
     }
     muti(cmtx){//矩阵乘法
         if(!cmtx instanceof Matrix||this.w!==cmtx.h) return null;
@@ -57,7 +81,7 @@ class Matrix{//矩阵
                 result[i][j] = sum; 
             }
         }
-        return new Matrix(result);
+        return new this.constructor(result);
     }
     reverse(){//矩阵转置
         let result = [];
@@ -67,11 +91,7 @@ class Matrix{//矩阵
                 result[j][i] = this.mtx[i][j];
             }
         }
-        let temp = this.h;
-        this.h = this.w;
-        this.w = temp;
-        this.mtx = result;
-        return this;
+        return new this.constructor(result);
     }
     //初等变换
     swapRow(x,y){//交换行
@@ -133,7 +153,6 @@ class Matrix{//矩阵
                 cyMtx.mutiRow(k/mtx[j][i],j);
                 cyMtx.addMutiRow(j,i,-(k/ref));
             }
-            console.log(mtx)
             if(mtx[i][i]!==0) rank++;
             detValue*=mtx[i][i];
         }
@@ -142,7 +161,7 @@ class Matrix{//矩阵
     }
     getStandard(){//获取标准型 初等行变换将矩阵化为标准型
         let cyMtx =  new Matrix(this.mtx);
-        let step = new UnitMatrix(this.h);
+        let step = new IdentityMatrix(null,this.h);
         cyMtx.init(this.mtx);
         let mtx = cyMtx.mtx;
         for(let i=0;i<cyMtx.w;++i){
@@ -158,7 +177,6 @@ class Matrix{//矩阵
                 step.addMutiRow(j,i,muti2);
             }
         }
-        console.log(mtx)
         for(let i=cyMtx.h-1;i>=0;--i){
             let ref = mtx[i][i];
             for(let j=i-1;j>=0;--j){
@@ -204,37 +222,88 @@ class Matrix{//矩阵
 
     }
 }
-class UnitMatrix extends Matrix{
-    constructor(n){
-        super()
-        this.w = n;
-        this.h = n;
-        this.init();
+class IdentityMatrix extends Matrix{
+    constructor(arr,n){
+        super(n?IdentityMatrix.make(n,arr):arr);
     }
-    init(){
-        for(let i=0;i<this.h;++i){
-            this.mtx[i] = [];
-            for(let j=0;j<this.w;++j){
-               this.mtx[i][j] = i===j?1:0;
+    static make(n,arr){
+        let res = []
+        for(let i=0;i<n;++i){
+            res[i] = [];
+            for(let j=0;j<n;++j){
+                res[i][j] = (arr && typeof arr[i]!=="undefined" && typeof arr[i][j]!=="undefined")?arr[i][j]:(i===j?1:0);
             }
         }
+        return res;
     }
 }
-function vlen(vec){//向量的长度
-    let ans = 0;
-    for(let i=0;i<vec.length;++i) ans+=vec[i]*vec[i];
-    return Math.sqrt(ans);
+class Vector extends Matrix{
+    constructor(arr){
+        super(arr);
+        this.vecType = null;//向量类型
+        if(arr.length === 1) this.vecType = 'row';
+        if(arr[0].length === 1) this.vecType = 'col';
+    }
+    vlen(){//向量的长度
+        let ans = 0;
+        for(let i=0;i<this.h;++i){
+            for(let j=0;j<this.w;++j){
+                ans+=this.mtx[i][j]*this.mtx[i][j];
+            }
+        }
+        return Math.sqrt(ans);
+    }
+    toIdentityVec(){//转为单位向量
+        let len = this.vlen(),arr = [];
+        for(let i=0;i<this.h;++i){
+            arr[i] = [];
+            for(let j=0;j<this.w;++j){
+                arr[i].push(len===0?0:(this.mtx[i][j]/len));
+            }
+        }
+        return {vec: new Vector(arr),vecLen:len};
+    }
+    dotMuti(cmtx){//点乘
+        if(!cmtx instanceof Vector||this.w!==cmtx.w||this.h!==cmtx.h) return null;
+        let ans = 0;
+        for(let i=0;i<this.h;++i){
+            for(let j=0;j<this.w;++j){
+                ans+=this.mtx[i][j]*cmtx.mtx[i][j];
+            }
+        }
+        return ans;
+    }
+    crossMuti(cmtx){//叉乘(内积)(只对三维笛卡尔坐标系)
+        if(!cmtx instanceof Vector||this.w!==cmtx.w||this.h!==cmtx.h) return null;
+        //默认为列向量
+        const [[ax],[ay],[az]] = this.mtx;
+        const [[bx],[by],[bz]] = cmtx.mtx;
+        return new Vector([[ay*bz-az*by],[az*bx-ax*bz],[ax*by-ay*bx]]);
+    }
+    tensorMuti(cmtx){//张量积(外积)
+        if(!cmtx instanceof Vector) return null;
+        let arr1 = [],arr2 = [],result = [];
+        for(let i=0;i<this.h;++i){
+            for(let j=0;j<this.w;++j){
+                arr1.push(this.mtx[i][j]);
+            }
+        }
+        for(let i=0;i<cmtx.h;++i){
+            for(let j=0;j<cmtx.w;++j){
+                arr2.push(cmtx.mtx[i][j]);
+            }
+        }
+        for(let i=0;i<arr1.length;++i){
+            result[i] = [];
+            for(let j=0;j<arr2.length;++j){
+                result[i][j] = arr1[i]*arr2[j];
+            }
+        }
+        return new Matrix(result);
+    }
 }
-function toIdentityVec(vec){//转为单位向量
-    let len = vlen(vec),ans = [];
-    for(let i=0;i<vec.length;++i){
-        ans.push(len===0?0:(vec[i]/len));
-    } 
-    ans.push(len);
-    return ans;
-}
-function vMuti(vec,muti){
-let [x,y,z] = vec;
-return [x*muti,y*muti,z*muti];
-}
-export {Matrix,toIdentityVec,vMuti};
+export {
+    Matrix,
+    Vector,
+    IdentityMatrix
+};

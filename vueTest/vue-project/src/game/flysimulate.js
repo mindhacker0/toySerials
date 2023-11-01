@@ -1,27 +1,27 @@
 import {ref,onMounted, reactive, watch, onUnmounted} from 'vue';
-import {Matrix,toIdentityVec,vMuti} from '@/game/matrix'; 
+import {Matrix,Vector} from '@/game/matrix'; 
+import { modelTrans,viewTrans } from './transform';
 export const useProjection = ()=>{//透视投影
     const viewRef = ref(null);
     let context = null;
     const viewPort = reactive({w:1280,h:720});//视口的大小
     const angle = reactive({x:0,y:0,z:0});//正方体旋转角度
-    const cameraAngle = reactive({x:30,y:30,z:0});//相机的旋转角度
+    const cameraAngle = reactive({x:0,y:0,z:0});//相机的旋转角度
     const world = new Matrix([
         [1,0,0,0],
         [0,1,0,0],
         [0,0,-1,0],
         [0,0,0,1]
     ]);//世界坐标，z轴向外
-    const camera = new Matrix([//相机坐标系
+    let camera = new Matrix([//相机坐标系
         [1,0,0,0],
         [0,1,0,0],
         [0,0,-1,0],
         [0,0,0,1]
     ]);
-    const perspectPoint = new Matrix([[viewPort.w/2],[viewPort.h/2],[200],[1]]);//透视消失点
-    const drawCoordinate = new Matrix([//canvas坐标系
+    const drawCoordinate = new Matrix([//相机坐标系到canvas坐标系
        [1,0,0,0],
-       [0,-1,0,0],
+       [0,-1,0,viewPort.h],
        [0,0,1,0],
        [0,0,0,1]
     ]);
@@ -82,47 +82,17 @@ export const useProjection = ()=>{//透视投影
         }
     }
     function coordinateTransform(){//计算坐标系的变换矩阵
-        const rotateMtx = rotateTransform(cameraAngle);//相机旋转
-        let transw_c = rotateMtx.muti(camera);
+        let transw_c = camera;
         transw_c = transw_c.muti(world);//世界坐标转为相机坐标
-        transw_c.mtx[0][3] += viewPort.w/2;
-        transw_c.mtx[1][3] += viewPort.h/2;
         const transc_v = drawCoordinate.muti(transw_c);//相机坐标转为canvas绘图坐标
-        transc_v.mtx[1][3] += viewPort.h;
         return transc_v;
     }
-    function rotateTransform(angle){//物体的旋转变换矩阵
-        let anglex = Math.PI*Number(angle.x)/180;
-        let angley = Math.PI*Number(angle.y)/180;
-        let anglez = Math.PI*Number(angle.z)/180;
-        //仿射变换
-        let rotateXMtx = new Matrix([//x轴旋转矩阵
-            [1,0,0,0],
-            [0,Math.cos(anglex),Math.sin(anglex),0],
-            [0,-Math.sin(anglex),Math.cos(anglex),0],
-            [0,0,0,1]
-        ]);
-        let rotateYMtx = new Matrix([//y轴旋转公式
-            [Math.cos(angley),0,Math.sin(angley),0],
-            [0,1,0,0],
-            [-Math.sin(angley),0,Math.cos(angley),0],
-            [0,0,0,1]
-        ]);
-        let rotateZMtx = new Matrix([//z轴旋转公式
-            [Math.cos(anglez),-Math.sin(anglez),0,0],
-            [Math.sin(anglez),Math.cos(anglez),0,0],
-            [0,0,1,0],
-            [0,0,0,1]
-        ]);
-        let rotateMtx = rotateYMtx.muti(rotateXMtx);
-        rotateMtx = rotateZMtx.muti(rotateMtx);
-        return rotateMtx;
-    }
     function pixelTrans(point,coordinateMtx){//物体坐标变换
-        const rotateMtx = rotateTransform(angle);
-        let colVec = new Matrix([[point[0]],[point[1]],[point[2]],[1]]);
-        //物体自身的旋转变换
-        colVec = rotateMtx.muti(colVec);
+        let colVec = new Vector([[point[0]],[point[1]],[point[2]],[1]]);
+        //模型变换，改变的是物体在世界坐标系中的姿态
+        let x = Math.sqrt(45*45 +45*45);
+        let model = modelTrans(new Vector([[45/x],[45/x],[0]]),x,[200,200,0]);
+        colVec = model.muti(colVec);
         // const [[],[],[dz]] = colVec.mtx;
         // let n = 200;
         // let f = 200+dz;
@@ -139,6 +109,8 @@ export const useProjection = ()=>{//透视投影
     }
     const render = ()=>{//主绘制函数
         context.clearRect(0, 0, viewPort.w, viewPort.h);
+        const view = viewTrans(new Vector([[0],[1],[0]]),45,[100,100,-100]);
+        camera = view.muti(camera);
         const transCnMtx = coordinateTransform();
         const pointMtx = (point)=>pixelTrans(point,transCnMtx).reverse();//组合转换矩阵
         const worldCnMtx = (point)=>transCnMtx.muti(new Matrix([[point[0]],[point[1]],[point[2]],[1]])).reverse();
@@ -189,7 +161,7 @@ export const useProjection = ()=>{//透视投影
     onMounted(()=>{
         initScreen();
         render();
-        play();
+        // play();
     });
     onUnmounted(()=>{
         cancelAnimationFrame(handlePlay.value);
