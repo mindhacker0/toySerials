@@ -253,7 +253,7 @@ class Vector extends Matrix{
         }
         return Math.sqrt(ans);
     }
-    toIdentityVec(){//转为单位向量
+    toIdentityVec(ispoint = false){//转为单位向量
         let len = this.vlen(),arr = [];
         for(let i=0;i<this.h;++i){
             arr[i] = [];
@@ -261,6 +261,7 @@ class Vector extends Matrix{
                 arr[i].push(len===0?0:(this.mtx[i][j]/len));
             }
         }
+        arr.push([ispoint?1:0]);
         return {vec: new Vector(arr),vecLen:len};
     }
     dotMuti(cmtx){//点乘
