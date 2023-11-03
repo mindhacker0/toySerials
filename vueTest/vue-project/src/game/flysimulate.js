@@ -1,6 +1,6 @@
 import {ref,onMounted, reactive, watch, onUnmounted} from 'vue';
 import {Matrix,Vector} from '@/game/matrix'; 
-import { modelTrans,viewTrans } from './transform';
+import { modelTrans,Camera } from './transform';
 export const useProjection = ()=>{//透视投影
     const viewRef = ref(null);
     let context = null;
@@ -13,17 +13,19 @@ export const useProjection = ()=>{//透视投影
         [0,0,-1,0],
         [0,0,0,1]
     ]);//世界坐标，z轴向外
-    let camera = new Matrix([//相机坐标系
-        [1,0,0,0],
-        [0,1,0,0],
-        [0,0,-1,0],
-        [0,0,0,1]
-    ]);
+    const cam = ref(null);
     const drawCoordinate = new Matrix([//相机坐标系到canvas坐标系
        [1,0,0,0],
        [0,-1,0,viewPort.h],
        [0,0,1,0],
        [0,0,0,1]
+    ]);
+    // canonical cube到屏幕坐标
+    const matrix_vp = new Matrix([
+        [viewPort.w/2,0,0,(viewPort.w-1)/2],
+        [0,viewPort.h/2,0,(viewPort.h-1)/2],
+        [0,0,1,0],
+        [0,0,0,1]
     ]);
     let rect = [
         [-100,100,-100],        
@@ -36,7 +38,7 @@ export const useProjection = ()=>{//透视投影
         [-100,-100,100]
     ];//定义一个矩形的顶点
     function worldAuxiliary(fnTransVec){//绘制世界坐标辅助线
-        let  rx = [[-500,0,0],[500,0,0]],ry = [[0,-500,0],[0,500,0]],rz = [[0,0,-500],[0,0,500]];
+        let  rx = [[-500,0,0],[500,0,0]],ry = [[0,-400,0],[0,400,0]],rz = [[0,0,-500],[0,0,500]];
         const fn = (point)=>fnTransVec(point).mtx[0].slice(0,2);
         const color = {[rx]:'red',[ry]:'green',[rz]:'blue'}
         for(let point of [rx,ry,rz]){
@@ -47,6 +49,7 @@ export const useProjection = ()=>{//透视投影
             context.moveTo(...fn(start));
             context.lineTo(...fn(end));
             context.stroke();
+            context.fillText('+',...fn(end));//正方向标记
             context.closePath();
             context.restore();
         }
@@ -81,39 +84,33 @@ export const useProjection = ()=>{//透视投影
             context.stroke();
         }
     }
-    function coordinateTransform(){//计算坐标系的变换矩阵
-        let transw_c = camera;
-        transw_c = transw_c.muti(world);//世界坐标转为相机坐标
-        const transc_v = drawCoordinate.muti(transw_c);//相机坐标转为canvas绘图坐标
-        return transc_v;
-    }
     function pixelTrans(point,coordinateMtx){//物体坐标变换
         let colVec = new Vector([[point[0]],[point[1]],[point[2]],[1]]);
         //模型变换，改变的是物体在世界坐标系中的姿态
         let x = Math.sqrt(45*45 +45*45);
-        let model = modelTrans(new Vector([[45/x],[45/x],[0]]),x,[200,200,0]);
-        colVec = model.muti(colVec);
-        // const [[],[],[dz]] = colVec.mtx;
-        // let n = 200;
-        // let f = 200+dz;
-        // const perspectMtx= new Matrix([
-        //     [n/f,0,0,0],
-        //     [0,n/f,0,0],
-        //     [0,0,(n+f)/f,-n],
-        //     [0,0,0,1]
-        // ]);
-        // colVec = perspectMtx.muti(colVec);
+        let model = modelTrans(new Vector([[45/x],[45/x],[0]]),0,[0,0,0]);
+        // colVec = model.muti(colVec);
         //坐标系变换
         colVec = coordinateMtx.muti(colVec);
         return colVec; 
     }
     const render = ()=>{//主绘制函数
         context.clearRect(0, 0, viewPort.w, viewPort.h);
-        const view = viewTrans(new Vector([[0],[1],[0]]),45,[100,100,-100]);
-        camera = view.muti(camera);
-        const transCnMtx = coordinateTransform();
-        const pointMtx = (point)=>pixelTrans(point,transCnMtx).reverse();//组合转换矩阵
-        const worldCnMtx = (point)=>transCnMtx.muti(new Matrix([[point[0]],[point[1]],[point[2]],[1]])).reverse();
+        cam.value = new Camera([100,100,100],[0,0,0],[0,300,0]);
+        const m1 = cam.value.getViewTrans();
+        // const m2 = cam.value.getOrthographicTrans(viewPort.w, viewPort.h,0,400);
+        // const m3 = matrix_vp.muti(m2).muti(m1);
+        const m4 = drawCoordinate.muti(m1);//相机坐标转为canvas绘图坐标
+        const testPoint = new Vector([[0],[100],[0],[1]]);
+        const transPoint = m4.muti(testPoint).reverse();
+        const [[x,y]] = transPoint.mtx;
+        context.beginPath();
+        context.arc(x, y, 5, 0, 2 * Math.PI);
+        context.stroke();
+        console.log(transPoint)
+        // console.log(m1,m2,m3,m4, m4.muti(new Vector([[100],[100],[100],[1]])))
+        const pointMtx = (point)=>pixelTrans(point,m4).reverse();//组合转换矩阵
+        const worldCnMtx = (point)=>m4.muti(new Vector([[point[0]],[point[1]],[point[2]],[1]])).reverse();
         worldAuxiliary(worldCnMtx);//绘制坐标轴
         drawCube(pointMtx);//绘制立方体
     };
