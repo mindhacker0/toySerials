@@ -158,7 +158,20 @@ class Camera{
   }
   //透视投影 视角 比率
   getPerspectiveTransV2(eye_fov,aspectRatio,zNear,zFar){
-    
+    let cot = 1/Math.tan(eye_fov/2);
+    const orthographic = new Matrix([
+      [cot/(aspectRatio*zNear),0,0,0],
+      [0,cot/zNear,0,0,0],
+      [0,0,2/(zNear-zFar),-(zNear+zFar)/zNear-zFar],
+      [0,0,0,1],
+    ])
+    const perspective = new Matrix([
+      [-zNear,0,0,0],
+      [0,-zNear,0,0],
+      [0,0,-zNear-zFar,-zNear*zFar],
+      [0,0,1,0]
+    ]);
+    return orthographic.muti(perspective);
   }
 }
 const ca = new Camera([100,100,100],[0,0,0],[0,300,0]);
