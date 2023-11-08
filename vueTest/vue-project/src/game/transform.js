@@ -10,10 +10,9 @@ export const RodriguesVector = (k,v,angle)=>{
   let m3 = k;
   m3 = m3.crossMuti(v);
   m3 = m3.numMuti(Math.sin(rad));
-  const [[x],[y],[z]] = m3.mtx;
-  m3 = new Vector([[x],[y],[z],[1]])
-  console.log('RodriguesVector',m1,m2,m3)
-  return m1.add(m2).add(m3);
+  const m4 = m1.add(m2).add(m3);
+  console.log('RodriguesVector',m1,m2,m3,m4)
+  return m4.toIdentityVec().vec;
 }
 //罗德里格旋转矩阵表示 4x4
 export const RodriguesMatrix = (k,angle)=>{
@@ -112,9 +111,8 @@ class Camera{
   }
   //正交投影 从视口矩形变为规范矩形 
   getOrthographicTrans(Vw,Vh,zNear,zFar){
-    let trans_ca2w = this.getViewTrans().inverse();
-    const [[l],[b],[n]] = trans_ca2w.muti(new Vector([[-Vw/2],[-Vh/2],[-zNear],[1]])).mtx;
-    const [[r],[t],[f]] = trans_ca2w.muti(new Vector([[Vw/2],[Vh/2],[-zFar],[1]])).mtx;
+    const [[l],[b],[n]] = new Vector([[-Vw/2],[-Vh/2],[-zNear],[1]]).mtx;
+    const [[r],[t],[f]] = new Vector([[Vw/2],[Vh/2],[-zFar],[1]]).mtx;
     const m1 = new Matrix([
       [1,0,0,-(r+l)/2],
       [0,1,0,-(t+b)/2],
@@ -132,29 +130,14 @@ class Camera{
   }
   //透视投影
   getPerspectiveTrans(Vw,Vh,zNear,zFar){
-    let trans_ca2w = this.getViewTrans().inverse();
-    const [[l],[b],[n]] = trans_ca2w.muti(new Vector([[-Vw/2],[-Vh/2],[-zNear],[1]])).mtx;
-    const [[r],[t],[f]] = trans_ca2w.muti(new Vector([[Vw/2],[Vh/2],[-zFar],[1]])).mtx;
-    const m1 = new Matrix([
-      [1,0,0,-(r+l)/2],
-      [0,1,0,-(t+b)/2],
-      [0,0,1,-(n+f)/2],
-      [0,0,0,1]
-    ]);//平移
-    const m2 = new Matrix([
-      [2/(r-l),0,0,0],
-      [0,2/(t-b),0,0],
-      [0,0,2/(n-f),0],
-      [0,0,0,1]
-    ]);//缩放
-    const m3 = new Matrix([
+    let orthographic = this.getOrthographicTrans(Vw,Vh,zNear,zFar);
+    const perspective = new Matrix([
       [-zNear,0,0,0],
       [0,-zNear,0,0],
       [0,0,-zNear-zFar,-zNear*zFar],
       [0,0,1,0]
     ]);
-    const m4 = m2.muti(m1).muti(m3);
-    return m4;
+    return orthographic.muti(perspective);
   }
   //透视投影 视角 比率
   getPerspectiveTransV2(eye_fov,aspectRatio,zNear,zFar){
@@ -174,7 +157,7 @@ class Camera{
     return orthographic.muti(perspective);
   }
 }
-const ca = new Camera([100,100,100],[0,0,0],[0,300,0]);
+//const ca = new Camera([100,100,100],[0,0,0],[0,300,0]);
 //console.log(ca.getOrthographicTrans(1280,720,0,400).muti(new Vector([[-100],[-100],[-100],[1]])));
 // console.log(ca.getViewTrans().muti(new Vector([[0],[300],[0],[1]])));
 export {

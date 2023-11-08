@@ -265,7 +265,7 @@ class Vector extends Matrix{
         return {vec: new Vector(arr),vecLen:len};
     }
     dotMuti(cmtx){//点乘
-        if(!cmtx instanceof Vector||this.w!==cmtx.w||this.h!==cmtx.h) return null;
+        if(!cmtx instanceof Matrix||this.w!==cmtx.w||this.h!==cmtx.h) return null;
         let ans = 0;
         for(let i=0;i<this.h;++i){
             for(let j=0;j<this.w;++j){
@@ -275,14 +275,14 @@ class Vector extends Matrix{
         return ans;
     }
     crossMuti(cmtx){//叉乘(内积)(只对三维笛卡尔坐标系)
-        if(!cmtx instanceof Vector||this.w!==cmtx.w||this.h!==cmtx.h) return null;
+        if(!cmtx instanceof Matrix||this.w!==cmtx.w||this.h!==cmtx.h) return null;
         //默认为列向量
         const [[ax],[ay],[az]] = this.mtx;
         const [[bx],[by],[bz]] = cmtx.mtx;
         return new Vector([[ay*bz-az*by],[az*bx-ax*bz],[ax*by-ay*bx]]);
     }
     tensorMuti(cmtx){//张量积(外积)
-        if(!cmtx instanceof Vector) return null;
+        if(!cmtx instanceof Matrix) return null;
         let arr1 = [],arr2 = [],result = [];
         for(let i=0;i<this.h;++i){
             for(let j=0;j<this.w;++j){
