@@ -169,7 +169,7 @@ export const useProjection = ()=>{//透视投影
     };
     const handlePlay = ref(null);
     const play = ()=>{
-        handlePlay.value = requestAnimationFrame(function(){angle.y++;play();})
+        handlePlay.value = requestAnimationFrame(function(){angle.y++;play();});
     };
     function initScreen(){//画布初始化
         context = viewRef.value.getContext('2d');

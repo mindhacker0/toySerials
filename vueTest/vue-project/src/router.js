@@ -1,6 +1,7 @@
 import {createRouter,createWebHistory} from "vue-router";
 import lineView from "@/views/lineView/index.vue";
 import ProjectionView from "@/views/projectionView/index.vue";
+import Rasterization from "@/views/rasterization/index.vue";
 import pictureOp from "@/views/pictureOp/index.vue";
 const router = createRouter({
     history:createWebHistory(import.meta.env.BASE_URl),
@@ -13,6 +14,10 @@ const router = createRouter({
             path:"/projection",
             name:"projection",
             component:ProjectionView
+        },{
+            path:"/rasterization",
+            name:"rasterization",
+            component:Rasterization
         },{
             path:"/picture-operation",
             name:"pictureOp",
