@@ -40,6 +40,7 @@ export const usePicture = ()=>{
             const image = await urlToImage(val);
             context.drawImage(image,0,0);
             imageData.value = context.getImageData(0,0,viewPort.w,viewPort.h);// r g b a
+            console.log(imageData.value);
         }
     },{immediate:true});
     onMounted(async()=>{
