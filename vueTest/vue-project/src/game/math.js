@@ -17,8 +17,7 @@ export const correctInterpolateZ = (vec1,vec2,vec3,point)=>{
     const [bx,by,bz] = vec2.mtx;
     const [cx,cy,cz] = vec3.mtx;
     const [alpha,beta,gamma] = computeBarycentric2D([ax,ay],[bx,by],[cx,cy],[x,y]);
-    let z = alpha * az  + beta * bz + gamma * cz;
-    // const z = 1/(alpha/az + beta/bz + gamma/cz);//点深度插值
+    const z = 1/(alpha/az + beta/bz + gamma/cz);//点深度插值
     const interpolateFn = function(av,bv,cv){//属性插值
         return z*(alpha*av/az+beta*bv/bz+gamma*cv/cz);
     };

@@ -237,67 +237,49 @@ class IdentityMatrix extends Matrix{
         return res;
     }
 }
-class Vector extends Matrix{
-    constructor(arr){
-        super(arr);
-        this.vecType = null;//向量类型
-        if(arr.length === 1) this.vecType = 'row';
-        if(arr[0].length === 1) this.vecType = 'col';
+//向量
+class Vector{
+    constructor(params){
+        this.vec = [];
+        if(typeof params === 'number') this.vec = new Array(params);
+        if(typeof params === 'object' && params instanceof Array) this.vec = params;   
+    }
+    cwiseProduct(vector){//各分量相乘
+        if(!vector instanceof Vector) return null;
+        const res = [];
+        for(let i=0;i<this.vec.length;++i) res.push(this.vec[i]*vector.vec[i]);
+        return new Vector(res); 
     }
     vlen(){//向量的长度
         let ans = 0;
-        for(let i=0;i<this.h;++i){
-            for(let j=0;j<this.w;++j){
-                ans+=this.mtx[i][j]*this.mtx[i][j];
-            }
-        }
+        for(let i=0;i<this.vec.length;++i) ans+=this.vec[i]*this.vec[i];
         return Math.sqrt(ans);
     }
-    toIdentityVec(ispoint = false){//转为单位向量
-        let len = this.vlen(),arr = [];
-        for(let i=0;i<this.h;++i){
-            arr[i] = [];
-            for(let j=0;j<this.w;++j){
-                arr[i].push(len===0?0:(this.mtx[i][j]/len));
-            }
-        }
-        arr.push([ispoint?1:0]);
-        return {vec: new Vector(arr),vecLen:len};
+    norm(){//化为单位向量
+        let len = this.vlen();
+        const res = [];
+        for(let i=0;i<this.vec.length;++i) res.push(len===0?0:this.vec[i]/len);
+        return new Vector(res);
     }
-    dotMuti(cmtx){//点乘
-        if(!cmtx instanceof Matrix||this.w!==cmtx.w||this.h!==cmtx.h) return null;
+    dot(vector){//点乘
+        if(!vector instanceof Vector) return null;
         let ans = 0;
-        for(let i=0;i<this.h;++i){
-            for(let j=0;j<this.w;++j){
-                ans+=this.mtx[i][j]*cmtx.mtx[i][j];
-            }
-        }
+        for(let i=0;i<this.vec.length;++i) ans+=this.vec[i]*vector.vec[i];
         return ans;
     }
-    crossMuti(cmtx){//叉乘(内积)(只对三维笛卡尔坐标系)
-        if(!cmtx instanceof Matrix||this.w!==cmtx.w||this.h!==cmtx.h) return null;
-        //默认为列向量
-        const [[ax],[ay],[az]] = this.mtx;
-        const [[bx],[by],[bz]] = cmtx.mtx;
-        return new Vector([[ay*bz-az*by],[az*bx-ax*bz],[ax*by-ay*bx]]);
+    cross(vector){//叉乘(内积)(只对三维笛卡尔坐标系)
+        if(!vector instanceof Vector) return null;
+        const [ax,ay,az] = this.vec;
+        const [bx,by,bz] = vector.vec;
+        return new Vector([ay*bz-az*by,az*bx-ax*bz,ax*by-ay*bx]);
     }
-    tensorMuti(cmtx){//张量积(外积)
-        if(!cmtx instanceof Matrix) return null;
-        let arr1 = [],arr2 = [],result = [];
-        for(let i=0;i<this.h;++i){
-            for(let j=0;j<this.w;++j){
-                arr1.push(this.mtx[i][j]);
-            }
-        }
-        for(let i=0;i<cmtx.h;++i){
-            for(let j=0;j<cmtx.w;++j){
-                arr2.push(cmtx.mtx[i][j]);
-            }
-        }
-        for(let i=0;i<arr1.length;++i){
+    tensor(vector){//张量积(外积)
+        if(!vector instanceof Vector) return null;
+        const result = [];
+        for(let i=0;i<this.vec.length;++i){
             result[i] = [];
-            for(let j=0;j<arr2.length;++j){
-                result[i][j] = arr1[i]*arr2[j];
+            for(let j=0;j<vector.vec.length;++j){
+                result[i][j] = this.vec[i]*vector.vec[j];
             }
         }
         return new Matrix(result);

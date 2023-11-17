@@ -38,3 +38,23 @@ export const urlToImage = function (url){//url转为image标签
         document.body.appendChild(image);
     });
 };
+const defaultConfig = {method:'GET',resType:'json'};
+export const xhr = function (url,config={}){//xhr请求
+    config = Object.assign(defaultConfig,config);
+    return new Promise((resolve,reject)=>{
+        var xhr = new XMLHttpRequest();
+        xhr.open(config.method,url,true);
+        xhr.responseType = config.resType;
+        if(config.headers){
+            for(let key in config.headers) xhr.setRequestHeader(key,config.headers[key]);
+        }
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === 4 && xhr.status === 200){
+                console.log(xhr)
+                resolve(xhr.response);
+            }
+        }
+        xhr.onerror = (err)=>reject(err);
+        xhr.send(config.body);
+    });
+};

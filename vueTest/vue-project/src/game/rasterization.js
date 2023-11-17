@@ -2,6 +2,7 @@ import {ref,onMounted,reactive} from 'vue';
 import {Matrix,Vector} from '@/game/matrix'; 
 import {correctInterpolateZ} from '@/game/math';
 import {Camera} from './transform';
+import {loadObject} from '@/utils/objLoader';
 export const useRaster = ()=>{
     const viewRef = ref(null);
     let context = null;
@@ -9,9 +10,9 @@ export const useRaster = ()=>{
     const frameBuff = new ImageData(viewPort.w,viewPort.h);//帧缓存
     const deepBuff = new Array(viewPort.w*viewPort.h);//深度缓冲区
     const pos = [// 顶点位置
-        [200, 0, -200],
-        [0, 200, -200],
-        [-200, 0, -200],
+        [300, 0, -200],
+        [0, 300, -200],
+        [-300, 0, -200],
         [100, 0, -201],
         [0, 100, -201],
         [-100, 0, -201],
@@ -48,19 +49,17 @@ export const useRaster = ()=>{
         let boundY = [Infinity,-Infinity];
         for(let i=0;i<vertexs.length;++i){
             const [x,y] = vertexs[i].mtx;
-            boundX[0] = Math.min(boundX[0],x);
-            boundX[1] = Math.max(boundX[1],x);
-            boundY[0] = Math.min(boundY[0],y);
-            boundY[1] = Math.max(boundY[1],y);
+            boundX[0] = Math.min(boundX[0],Math.floor(x));
+            boundX[1] = Math.max(boundX[1],Math.ceil(x));
+            boundY[0] = Math.min(boundY[0],Math.floor(y));
+            boundY[1] = Math.max(boundY[1],Math.ceil(y));
         }
-        boundX = boundX.map(Math.round);
-        boundY = boundY.map(Math.round);
         console.log(vertexs,boundX,boundY);
         for(let i=boundY[0];i<=boundY[1];++i){
             for(let j=boundX[0];j<=boundX[1];++j){//每一个像素点
                 const {z,interpolateFn,coordinate} = correctInterpolateZ(vertexs[0],vertexs[1],vertexs[2],[j,i]);
                 const [alpha,beta,gamma] = coordinate;
-                if(alpha>0 && beta>0 && gamma>0){//点在三角形内
+                if(alpha>=0 && beta>=0 && gamma>=0){//点在三角形内
                     const baseIndex = Math.floor(i*viewPort.w+j);
                     if(deepBuff[baseIndex]<z){
                         deepBuff[baseIndex] = z;
