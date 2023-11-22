@@ -28,8 +28,6 @@ export const urlToImage = function (url){//url转为image标签
     return new Promise((resolve,reject)=>{
         const image = new Image();
         image.src = url;
-        // image.width = viewPort.w;
-        // image.height = viewPort.h;
         image.onload = (e)=>{
             resolve(image);
             document.body.removeChild(image);

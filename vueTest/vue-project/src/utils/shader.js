@@ -1,14 +1,27 @@
 import { Vector } from "../game/matrix";
-
+let once = 0;
+//通过UV获取贴图像素值
+export const getColorByUV = function(imageData,texture){
+  const {width,height,data} = imageData;
+  const [U,V] = texture.vec;
+  if(once==0){ console.log(width,height,data,U,V); once++;}
+  const x = Math.floor(U*width);
+  const y = Math.floor((1-V)*height);
+  const baseIndex = (y*height+x)*4;
+  return new Vector([data[baseIndex],data[baseIndex+1],data[baseIndex+2]]);
+}
 //简单的法向量着色器
 export const normal_fragment_shader = function({normal}){
   const [r,g,b] = normal.vec.map(v=> Math.round((v+1)*255/2));
   return [r,g,b,255];
 }
-let once = 0;
 //布林-冯着色模型
-export const phong_fragment_shader = function({normal,origin,color = new Vector([148,121.0,92.0])}){
+export const phong_fragment_shader = function({normal,origin,texture,texturImage}){
   normal = normal.norm();
+  let color = new Vector([148,121.0,92.0]);
+  if(texturImage){
+    color = getColorByUV(texturImage,texture);
+  }
   const ka = new Vector([0.005,0.005,0.005]);//环境光系数
   const kd = new Vector(color.vec.map(v=>v/255));//漫反射系数 兰伯特余弦定理
   const ks = new Vector([0.7937,0.7937,0.7937]);//镜面反射系数 
@@ -26,12 +39,10 @@ export const phong_fragment_shader = function({normal,origin,color = new Vector(
     const ray_nm = ray.norm();
     const r = ray.vlen();
     const h = look_nm.cwiseAdd(ray_nm).norm();
-    result=result.cwiseAdd(ka.cwiseProduct(amb_light_intensity));
-    result=result.cwiseAdd(kd.cwiseProduct(intens.numMuti(1/(r*r))).numMuti(Math.max(0,normal.dot(ray_nm))));
-    result=result.cwiseAdd(ks.cwiseProduct(intens.numMuti(1/(r*r))).numMuti(Math.pow(Math.max(0,normal.dot(h)),p)));
-    if(once==0){ console.log(normal.dot(ray_nm),normal.vlen()); once++;}
+    result=result.cwiseAdd(ka.cwiseProduct(amb_light_intensity));//添加环境光
+    result=result.cwiseAdd(kd.cwiseProduct(intens.numMuti(1/(r*r))).numMuti(Math.max(0,normal.dot(ray_nm))));//添加漫反射光
+    result=result.cwiseAdd(ks.cwiseProduct(intens.numMuti(1/(r*r))).numMuti(Math.pow(Math.max(0,normal.dot(h)),p)));//添加镜面反射光
   }
-  // console.log(result.vec);
   const [r,g,b] = result.vec;
   return [r*255,g*255,b*255,255];
 }

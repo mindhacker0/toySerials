@@ -4,6 +4,7 @@ import {correctInterpolateZ,insideTriangle} from '@/game/math';
 import {modelTrans,Camera} from './transform';
 import {loadObject} from '@/utils/objLoader';
 import { normal_fragment_shader,phong_fragment_shader } from '@/utils/shader';
+import { xhr,urlToImage } from '@/utils';
 export const useRaster = ()=>{
     const viewRef = ref(null);
     let context = null;
@@ -12,6 +13,7 @@ export const useRaster = ()=>{
     const deepBuff = new Array(viewPort.w*viewPort.h);//深度缓冲区
     let model;
     const cam = ref(null);
+    const texturImage = ref(null);
     cam.value = new Camera([0,360,-300],[0,360,0],[0,720,-300]);
     const drawCoordinate = new Matrix([//相机坐标系(相机坐标系为屏幕中心点)到canvas坐标系
        [1,0,0,viewPort.w/2],
@@ -27,11 +29,11 @@ export const useRaster = ()=>{
         [0,0,0,1]
     ]);
     let once = 0;
-    function rasterize_triangle(trangle,frameBuff){//三角形处理
+    function rasterize_triangle(trangle,frameBuff){//三角形光栅化处理
         const {vertex,normal,texture,origin} = trangle;
         let boundX = [Infinity,-Infinity];
         let boundY = [Infinity,-Infinity];
-        for(let i=0;i<vertex.length;++i){
+        for(let i=0;i<vertex.length;++i){//计算包围盒的范围
             const [x,y] = vertex[i].vec;
             boundX[0] = Math.min(boundX[0],Math.floor(x));
             boundX[1] = Math.max(boundX[1],Math.ceil(x));
@@ -40,19 +42,20 @@ export const useRaster = ()=>{
         }
         //console.log(vertex,normal,texture,boundX,boundY);
         for(let i=boundY[0];i<=boundY[1];++i){
-            for(let j=boundX[0];j<=boundX[1];++j){//每一个像素点
-                if(insideTriangle(vertex[0],vertex[1],vertex[2],[j,i])){//点在三角形内
-                    const {z,interpolateFn,interpolateVec,coordinate} = correctInterpolateZ(vertex[0],vertex[1],vertex[2],[j+0.5,i+0.5]);
+            for(let j=boundX[0];j<=boundX[1];++j){//遍历包围盒每一个像素点
+                if(insideTriangle(vertex[0],vertex[1],vertex[2],[j,i])){//点是否在三角形内
+                    const {z,interpolateFn,interpolateVec,coordinate} = correctInterpolateZ(vertex[0],vertex[1],vertex[2],[j+0.5,i+0.5]);//计算点在三角形内的插值
                     const baseIndex = Math.floor(i*viewPort.w+j);
                     const normal_intp = interpolateVec(normal[0],normal[1],normal[2]);
                     const origin_intp = interpolateVec(origin[0],origin[1],origin[2]);
-                    const texture_intp = interpolateVec(texture[0],texture[1],texture[2]);
+                    const texture_intp = interpolateVec(texture[0],texture[1],texture[2]);//贴图坐标插值
                     if(deepBuff[baseIndex]<z){
                         deepBuff[baseIndex] = z;
                         const color = phong_fragment_shader({
                             normal:normal_intp,
                             origin:origin_intp,//透视前相机坐标系中，三角形的插值
-                            texture:texture_intp
+                            texture:texture_intp,
+                            texturImage:texturImage.value
                         });
                         if(once == 0) {
                             console.log( '插值后',normal_intp,origin_intp,texture);
@@ -116,9 +119,21 @@ export const useRaster = ()=>{
     function initScreen(){//画布初始化
         context = viewRef.value.getContext('2d');
     }
+    async function getTextureResource(url){//图片blob转imageData
+        const res = await xhr(url,{resType:'blob'});
+        if(res && res instanceof Blob){
+            const objUrl = URL.createObjectURL(res);
+            const image = await urlToImage(objUrl);
+            const elem = document.createElement('canvas');
+            const ctx = elem.getContext('2d');
+            ctx.drawImage(image,0,0);
+            return ctx.getImageData(0,0,image.width,image.height);
+        }
+    }
     onMounted(async ()=>{
         initScreen();
-        const result = await loadObject('src/models/spot/spot_triangulated_good.obj');
+        const result = await loadObject('src/models/spot/spot_triangulated_good.obj');//加载模型文件
+        texturImage.value = await getTextureResource('src/models/spot/spot_texture.png');//加载贴图文件
         model = result.face;
         render();
     });
