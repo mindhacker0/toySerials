@@ -50,7 +50,6 @@ export const xhr = function (url,config={}){//xhr请求
         }
         xhr.onreadystatechange = () => {
             if (xhr.readyState === 4 && xhr.status === 200){
-                console.log(xhr)
                 resolve(xhr.response);
             }
         }

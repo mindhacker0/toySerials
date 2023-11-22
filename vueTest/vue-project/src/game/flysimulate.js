@@ -92,9 +92,9 @@ export const useProjection = ()=>{//透视投影
         }
     }
     function pixelTrans(point,coordinateMtx){//物体坐标变换
-        let colVec = new Vector([[point[0]],[point[1]],[point[2]],[1]]);
+        let colVec = new Matrix([[point[0]],[point[1]],[point[2]],[1]]);
         //模型变换，改变的是物体在世界坐标系中的姿态
-        let model = modelTrans(new Vector([[0],[1],[0]]),angle.y,[0,0,0]);
+        let model = modelTrans(new Vector([0,1,0]),angle.y,[0,0,0]);
         colVec = model.muti(colVec);
         //坐标系变换
         colVec = coordinateMtx.muti(colVec);
@@ -110,17 +110,9 @@ export const useProjection = ()=>{//透视投影
         const m2 = cam.value.getPerspectiveTrans(viewPort.w, viewPort.h,200,600);
         const m3 = matrix_vp.muti(m2).muti(m1);
         const m4 = drawCoordinate.muti(m3);//相机坐标转为canvas绘图坐标
-        // const testPoint = new Vector([[0],[100],[0],[1]]);
-        // const transPoint = m4.muti(testPoint).reverse();
-        // const [[x,y]] = transPoint.mtx;
-        // context.beginPath();
-        // context.arc(x, y, 5, 0, 2 * Math.PI);
-        // context.stroke();
-        // console.log(transPoint)
-        //console.log(m1,m2,m3,m4, m3.muti(new Vector([[0],[0],[0],[1]])))
         //TODO:绘制图形
         const pointMtx = (point)=>pixelTrans(point,m4).reverse();//组合转换矩阵
-        const worldCnMtx = (point)=>m4.muti(new Vector([[point[0]],[point[1]],[point[2]],[1]])).reverse();
+        const worldCnMtx = (point)=>m4.muti(new Matrix([[point[0]],[point[1]],[point[2]],[1]])).reverse();
         worldAuxiliary(worldCnMtx);//绘制坐标轴
         drawCube(pointMtx);//绘制立方体
     };
@@ -155,15 +147,15 @@ export const useProjection = ()=>{//透视投影
     const handleKeyEvents = (e)=>{
         console.log(e)
         if(~[65,68],indexOf(e.keyCode)){
-            const [[ux],[uy],[uz]] = cam.value.up.mtx;
-            const [[lx],[ly],[lz]] = cam.value.lookAt.mtx;
+            const [[ux],[uy],[uz]] = cam.value.up.vec;
+            const [[lx],[ly],[lz]] = cam.value.lookAt.vec;
             if(e.keyCode === 65){//a
-                cam.value.lookAt = RodriguesVector(new Vector([[ux],[uy],[uz]]),new Vector([[lx],[ly],[lz]]),1);
+                cam.value.lookAt = RodriguesVector(new Vector([ux,uy,uz]),new Vector([lx,ly,lz]),1);
             }
             if(e.keyCode === 68){//a
-                cam.value.lookAt = RodriguesVector(new Vector([[ux],[uy],[uz]]),new Vector([[lx],[ly],[lz]]),-1);
+                cam.value.lookAt = RodriguesVector(new Vector([ux,uy,uz]),new Vector([lx,ly,lz]),-1);
             }
-            console.log([[lx],[ly],[lz]],cam.value.lookAt.mtx);
+            console.log([[lx],[ly],[lz]],cam.value.lookAt.vec);
             render();
         }
     };

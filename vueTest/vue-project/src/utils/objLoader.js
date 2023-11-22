@@ -3,11 +3,11 @@ import { Vector } from "@/game/matrix";
 //加载解析Obj文件
 export const loadObject = async function (url){
     const content = await xhr(url,{resType:'text'});
-    // console.log(content);
-    if(content) objParser(content);
+    return content?objParser(content):null;
 }
-//obj parser
-//https://www.cnblogs.com/zhiminzeng/p/16550905.html
+//obj file parser
+//只支持注释 v vn vt f,目前不支持其它token
+//文件结构参考:https://www.cnblogs.com/zhiminzeng/p/16550905.html
 class Comment{//注释
     constructor(){
         this.content = "";
@@ -166,7 +166,7 @@ const texture = function(s,context){//贴图坐标解析
     }
 }
 //face 
-const faceStart = function (s,context){//开始
+const faceStart = function (s,context){//face开始
     context.ptr = new Face();
     context.params.vertex = [];
     context.params.texture = [];
@@ -174,14 +174,14 @@ const faceStart = function (s,context){//开始
     context.params.number = '';
     return face;
 }
-const face = function(s,context){//贴图坐标解析
+const face = function(s,context){//贴图坐标解析 #下标从1开始
     if(s === '\r'){
         if(context.params.number){
             let arr = context.params.number.split("/").map((val)=>parseInt(val));
             const typeMap = [context.params.vertex,context.params.texture,context.params.normal];
             const baseMap = [context.global.vertex,context.global.texture,context.global.normal]
             for(let k=0;k<arr.length;++k){
-                typeMap[k].push(baseMap[k][arr[k]]);
+                typeMap[k].push(baseMap[k][arr[k]-1]);
             }
             context.params.number = "";
         }
@@ -200,7 +200,7 @@ const face = function(s,context){//贴图坐标解析
             const typeMap = [context.params.vertex,context.params.texture,context.params.normal];
             const baseMap = [context.global.vertex,context.global.texture,context.global.normal]
             for(let k=0;k<arr.length;++k){
-                typeMap[k].push(baseMap[k][arr[k]]);
+                typeMap[k].push(baseMap[k][arr[k]-1]);
             }
             context.params.number = "";
         }
@@ -230,6 +230,5 @@ export const objParser = function (string){
       state = state(string[index],context);
       index++;  
     }    
-    console.log(context);
+    return context.global;
 }
-loadObject('src/models/spot/spot_triangulated_good.obj');

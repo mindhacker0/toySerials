@@ -244,10 +244,21 @@ class Vector{
         if(typeof params === 'number') this.vec = new Array(params);
         if(typeof params === 'object' && params instanceof Array) this.vec = params;   
     }
+    numMuti(num){
+        const res = [];
+        for(let i=0;i<this.vec.length;++i) res.push(this.vec[i]*num);
+        return new Vector(res);
+    }
     cwiseProduct(vector){//各分量相乘
         if(!vector instanceof Vector) return null;
         const res = [];
         for(let i=0;i<this.vec.length;++i) res.push(this.vec[i]*vector.vec[i]);
+        return new Vector(res); 
+    }
+    cwiseAdd(vector){//各分量相加
+        if(!vector instanceof Vector) return null;
+        const res = [];
+        for(let i=0;i<this.vec.length;++i) res.push(this.vec[i]+vector.vec[i]);
         return new Vector(res); 
     }
     vlen(){//向量的长度
