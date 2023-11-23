@@ -1,16 +1,13 @@
 import { Vector } from "../game/matrix";
-let once = 0,maxU = -1;
 //通过UV获取贴图像素值
 export const getColorByUV = function(imageData,texture){
   const {width,height,data} = imageData;
   let [U,V] = texture.vec;
-  maxU=Math.max(maxU,V);
   U = U>1?1:U<0?0:U;
   V = V>1?1:V<0?0:V;
   const x = Math.floor(U*width);
   const y = Math.floor((1-V)*height);
   const baseIndex = (y*width+x)*4;
-  if(once==20000){ console.log(baseIndex);} once++;
   return new Vector([data[baseIndex],data[baseIndex+1],data[baseIndex+2]]);
 }
 //简单的法向量着色器

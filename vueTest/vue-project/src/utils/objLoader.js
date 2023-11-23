@@ -174,7 +174,7 @@ const faceStart = function (s,context){//face开始
     context.params.number = '';
     return face;
 }
-const face = function(s,context){//贴图坐标解析 #下标从1开始
+const face = function(s,context){//贴图坐标解析 #face中下标从1开始
     if(s === '\r'){
         if(context.params.number){
             let arr = context.params.number.split("/").map((val)=>parseInt(val));
