@@ -1,9 +1,9 @@
-import {ref,onMounted,reactive} from 'vue';
+import {ref,onMounted,reactive,onUnmounted} from 'vue';
 import {Matrix,Vector} from '@/game/matrix'; 
 import {correctInterpolateZ,insideTriangle} from '@/game/math';
 import {modelTrans,Camera} from './transform';
 import {loadObject} from '@/utils/objLoader';
-import { normal_fragment_shader,phong_fragment_shader } from '@/utils/shader';
+import { normal_fragment_shader,phong_fragment_shader,getColorByUV } from '@/utils/shader';
 import { xhr,urlToImage } from '@/utils';
 export const useRaster = ()=>{
     const viewRef = ref(null);
@@ -14,6 +14,7 @@ export const useRaster = ()=>{
     let model;
     const cam = ref(null);
     const texturImage = ref(null);
+    let angle = 140;
     cam.value = new Camera([0,360,-300],[0,360,0],[0,720,-300]);
     const drawCoordinate = new Matrix([//相机坐标系(相机坐标系为屏幕中心点)到canvas坐标系
        [1,0,0,viewPort.w/2],
@@ -28,7 +29,6 @@ export const useRaster = ()=>{
         [0,0,1,0],
         [0,0,0,1]
     ]);
-    let once = 0;
     function rasterize_triangle(trangle,frameBuff){//三角形光栅化处理
         const {vertex,normal,texture,origin} = trangle;
         let boundX = [Infinity,-Infinity];
@@ -56,11 +56,7 @@ export const useRaster = ()=>{
                             origin:origin_intp,//透视前相机坐标系中，三角形的插值
                             texture:texture_intp,
                             texturImage:texturImage.value
-                        });
-                        if(once == 0) {
-                            console.log( '插值后',normal_intp,origin_intp,texture);
-                            once =1;
-                        }                
+                        });                
                         for(let k =0;k<4;++k){//r g b a
                             frameBuff.data[baseIndex*4+k] = color[k];//  interpolateFn(colors[0][k],colors[1][k],colors[2][k]);
                         }
@@ -76,7 +72,7 @@ export const useRaster = ()=>{
             deepBuff[i] = -Infinity;
         }
         //视图变换
-        const model_mtx = modelTrans(new Vector([0,1,0]),140,[0,0,0],[2.5,2.5,2.5]);
+        const model_mtx = modelTrans(new Vector([0,1,0]),angle,[0,0,0],[2.5,2.5,2.5]);
         const camera_mtx = new Matrix([
             [1,0,0,0],
             [0,1,0,0],
@@ -113,7 +109,7 @@ export const useRaster = ()=>{
                 origin:vertex.map(viewTrans)
             },frameBuff);
         }
-        console.log(frameBuff);
+        // console.log(frameBuff);
         context.putImageData(frameBuff,0,0);//放置图像缓冲
     }
     function initScreen(){//画布初始化
@@ -124,18 +120,34 @@ export const useRaster = ()=>{
         if(res && res instanceof Blob){
             const objUrl = URL.createObjectURL(res);
             const image = await urlToImage(objUrl);
+            const {width,height} = image;
             const elem = document.createElement('canvas');
+            elem.width = width;
+            elem.height = height;
+            // document.body.appendChild(elem);
             const ctx = elem.getContext('2d');
             ctx.drawImage(image,0,0);
-            return ctx.getImageData(0,0,image.width,image.height);
+            return ctx.getImageData(0,0,width,height);
         }
     }
+    const handlePlay = ref(null);
+    const play = ()=>{
+        handlePlay.value = requestAnimationFrame(function(){
+            angle++;
+            render();
+            play();
+        });
+    };
     onMounted(async ()=>{
         initScreen();
         const result = await loadObject('src/models/spot/spot_triangulated_good.obj');//加载模型文件
         texturImage.value = await getTextureResource('src/models/spot/spot_texture.png');//加载贴图文件
         model = result.face;
         render();
+        // play();
+    });
+    onUnmounted(()=>{
+        cancelAnimationFrame(handlePlay.value);
     });
     return {
         viewRef
