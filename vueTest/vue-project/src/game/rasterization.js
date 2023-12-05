@@ -1,9 +1,8 @@
 import {ref,onMounted,reactive,onUnmounted} from 'vue';
 import {Matrix,Vector} from '@/game/matrix'; 
-import {correctInterpolateZ,insideTriangle} from '@/game/math';
 import {modelTrans,Camera} from './transform';
 import {loadObject} from '@/utils/objLoader';
-import { normal_fragment_shader,phong_fragment_shader,getColorByUV } from '@/utils/shader';
+import { rasterize_triangle,meshTriRaster } from '@/utils/raster';
 import { xhr,urlToImage } from '@/utils';
 export const useRaster = ()=>{
     const viewRef = ref(null);
@@ -29,46 +28,9 @@ export const useRaster = ()=>{
         [0,0,1,0],
         [0,0,0,1]
     ]);
-    function rasterize_triangle(trangle,frameBuff){//三角形光栅化处理
-        const {vertex,normal,texture,origin} = trangle;
-        let boundX = [Infinity,-Infinity];
-        let boundY = [Infinity,-Infinity];
-        for(let i=0;i<vertex.length;++i){//计算包围盒的范围
-            const [x,y] = vertex[i].vec;
-            boundX[0] = Math.min(boundX[0],Math.floor(x));
-            boundX[1] = Math.max(boundX[1],Math.ceil(x));
-            boundY[0] = Math.min(boundY[0],Math.floor(y));
-            boundY[1] = Math.max(boundY[1],Math.ceil(y));
-        }
-        //console.log(vertex,normal,texture,boundX,boundY);
-        for(let i=boundY[0];i<=boundY[1];++i){
-            for(let j=boundX[0];j<=boundX[1];++j){//遍历包围盒每一个像素点
-                if(insideTriangle(vertex[0],vertex[1],vertex[2],[j,i])){//点是否在三角形内
-                    const {z,interpolateFn,interpolateVec,coordinate} = correctInterpolateZ(vertex[0],vertex[1],vertex[2],[j+0.5,i+0.5]);//计算点在三角形内的插值
-                    const baseIndex = Math.floor(i*viewPort.w+j);
-                    const normal_intp = interpolateVec(normal[0],normal[1],normal[2]);
-                    const origin_intp = interpolateVec(origin[0],origin[1],origin[2]);
-                    const texture_intp = interpolateVec(texture[0],texture[1],texture[2]);//贴图坐标插值
-                    if(deepBuff[baseIndex]<z){
-                        deepBuff[baseIndex] = z;
-                        const color = phong_fragment_shader({
-                            normal:normal_intp,
-                            origin:origin_intp,//透视前相机坐标系中，三角形的插值
-                            texture:texture_intp,
-                            texturImage:texturImage.value
-                        });                
-                        for(let k =0;k<4;++k){//r g b a
-                            frameBuff.data[baseIndex*4+k] = color[k];//  interpolateFn(colors[0][k],colors[1][k],colors[2][k]);
-                        }
-                        //console.log(i*viewPort.w+j)
-                    }
-                }    
-            }
-        }
-    }
     function render(){//渲染
         for(let i=0;i<frameBuff.data.length;++i){//初始化帧缓冲区，和深度缓冲区
-            frameBuff.data[i] = 0;
+            frameBuff.data[i] = i%4===3?255:0;
             deepBuff[i] = -Infinity;
         }
         //视图变换
@@ -90,24 +52,29 @@ export const useRaster = ()=>{
             let [[tx],[ty],[tz],[tw]] = m4.muti(new Matrix([[x],[y],[z],[1]])).mtx;
             return new Vector([tx/tw,ty/tw,tz/tw]);
         }
-        function viewTrans(pos){//顶点坐标变换
+        function viewTrans(pos){//透视前坐标变换
             let [x,y,z] = pos.vector.vec;
             let [[tx],[ty],[tz],[tw]] = originTrans.muti(new Matrix([[x],[y],[z],[1]])).mtx;
             return new Vector([tx,ty,tz]);
         }
-        function normalTrans(pos){//顶点坐标变换
+        function normalTrans(pos){//法线坐标变换
             let [x,y,z] = pos.vector.vec;
             let [[tx],[ty],[tz],[tw]] = transVerse.muti(new Matrix([[x],[y],[z],[0]])).mtx;
             return new Vector([tx,ty,tz]);
         }
         for(let i=0;i<model.length;++i){//遍历多边形（三角形）
             let {vertex,normal,texture} = model[i];
-            rasterize_triangle({
+            meshTriRaster({
                 vertex:vertex.map(vertexTrans),
                 normal:normal.map(normalTrans),
                 texture:texture.map(v=>v.vector),
                 origin:vertex.map(viewTrans)
-            },frameBuff);
+            },{
+                viewPort,
+                deepBuff,
+                frameBuff,
+                texturImage:texturImage.value
+            });
         }
         // console.log(frameBuff);
         context.putImageData(frameBuff,0,0);//放置图像缓冲
