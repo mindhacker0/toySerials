@@ -55,3 +55,18 @@ export const xhr = function (url,config={}){//xhr请求
         xhr.send(config.body);
     });
 };
+export function calcFPS(vector) {
+    // 提取容器中的前 20 个元素来计算平均值；
+    const AVERAGE_RECORDS_COUNT = 20;
+    if (vector.length > AVERAGE_RECORDS_COUNT) {
+        vector.shift(-1);  // 维护容器大小；
+    } else {
+        return 'NaN';
+    }
+    // 计算平均每帧在绘制过程中所消耗的时间；
+    let averageTime = (vector.reduce((pre, item) => {
+        return pre + item;
+    }, 0) / Math.abs(AVERAGE_RECORDS_COUNT));
+    // 估算出 1s 内能够绘制的帧数；
+    return (1000 / averageTime).toFixed(2);
+}

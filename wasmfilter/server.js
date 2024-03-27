@@ -7,7 +7,8 @@ const PORT = 8888;  // 服务器监听的端口号；
 
 const mime = {
   "html": "text/html;charset=UTF-8",
-  "wasm": "application/wasm"  // 当遇到对 ".wasm" 格式文件的请求时，返回特定的 MIME 头；
+  "wasm": "application/wasm",  // 当遇到对 ".wasm" 格式文件的请求时，返回特定的 MIME 头；
+  "js": "text/javascript;charset=utf-8"
 };
 
 http.createServer((req, res) => {

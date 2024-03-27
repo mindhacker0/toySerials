@@ -3,7 +3,8 @@ import {Matrix,Vector} from '@/game/matrix';
 import {modelTrans,Camera} from './transform';
 import {loadObject} from '@/utils/objLoader';
 import { rasterize_triangle,meshTriRaster } from '@/utils/raster';
-import { xhr,urlToImage } from '@/utils';
+import { xhr,urlToImage,calcFPS } from '@/utils';
+import {loadFFmpeg} from "./record";
 export const useRaster = ()=>{
     const viewRef = ref(null);
     let context = null;
@@ -13,7 +14,10 @@ export const useRaster = ()=>{
     let model;
     const cam = ref(null);
     const texturImage = ref(null);
+    const fpsShow = ref(null);
     let angle = 140;
+    const fpsVec = [];
+    const ffmpeg = ref(null);
     cam.value = new Camera([0,360,-300],[0,360,0],[0,720,-300]);
     const drawCoordinate = new Matrix([//相机坐标系(相机坐标系为屏幕中心点)到canvas坐标系
        [1,0,0,viewPort.w/2],
@@ -64,7 +68,7 @@ export const useRaster = ()=>{
         }
         for(let i=0;i<model.length;++i){//遍历多边形（三角形）
             let {vertex,normal,texture} = model[i];
-            meshTriRaster({
+            rasterize_triangle({
                 vertex:vertex.map(vertexTrans),
                 normal:normal.map(normalTrans),
                 texture:texture.map(v=>v.vector),
@@ -101,7 +105,11 @@ export const useRaster = ()=>{
     const play = ()=>{
         handlePlay.value = requestAnimationFrame(function(){
             angle++;
+            const timeStart = performance.now();
             render();
+            let timeUsed = performance.now() - timeStart;
+            fpsVec.push(timeUsed);
+            fpsShow.value.value = calcFPS(fpsVec);
             play();
         });
     };
@@ -111,12 +119,14 @@ export const useRaster = ()=>{
         texturImage.value = await getTextureResource('src/models/spot/spot_texture.png');//加载贴图文件
         model = result.face;
         render();
-        // play();
+        play();
+        ffmpeg.value = await loadFFmpeg();
     });
     onUnmounted(()=>{
         cancelAnimationFrame(handlePlay.value);
     });
     return {
-        viewRef
+        viewRef,
+        fpsShow
     }
 }

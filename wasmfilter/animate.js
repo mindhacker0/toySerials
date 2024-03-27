@@ -34,23 +34,18 @@ function draw() {
 
   raf = window.requestAnimationFrame(draw);
 }
-
-// canvas.addEventListener("mouseover", (e) => {
-//   raf = window.requestAnimationFrame(draw);
-// });
-
-// canvas.addEventListener("mouseout", (e) => {
-//   window.cancelAnimationFrame(raf);
-// });
 const chunks = [];
-const worker = new Worker("./worker.js");
-const mediaStream = canvas.captureStream(60);
+console.log(new FFmpeg());
+// const worker = new Worker("./worker.js");
+const mediaStream = canvas.captureStream();
 const record = new MediaRecorder(mediaStream,{
-    mimeType:"video/webm;codecs=vp9"
+    mimeType: "video/webm;codecs=vp9",
+    videoBitsPerSecond: 19600000
 });
+
 record.ondataavailable = (e)=>{
     chunks.push(e.data);
-    worker.postMessage({name:"chunk",payload:e.data});
+    // worker.postMessage({name:"chunk",payload:e.data});
 };
 record.onstop = function(e) {
     console.log("data available after MediaRecorder.stop() called.",e.data); 
@@ -61,7 +56,7 @@ btnRcd.addEventListener("click",(e)=>{
     }else{
         console.log(e);
         record.stop();
-        worker.postMessage({name:"done"});
+        // worker.postMessage({name:"done"});
         var link = document.createElement('a');
         link.style.display = 'none';
         var fullBlob = new Blob(chunks);
