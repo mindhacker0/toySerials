@@ -8,8 +8,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ffmpeg/ffmpeg": "^0.12.10",
-    "@ffmpeg/util": "^0.12.1",
     "lodash": "^4.17.21",
     "vue": "^3.2.47"
   },
