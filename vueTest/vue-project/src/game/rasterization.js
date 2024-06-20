@@ -4,7 +4,6 @@ import {modelTrans,Camera} from './transform';
 import {loadObject} from '@/utils/objLoader';
 import { rasterize_triangle,meshTriRaster } from '@/utils/raster';
 import { xhr,urlToImage,calcFPS } from '@/utils';
-import {loadFFmpeg} from "./record";
 export const useRaster = ()=>{
     const viewRef = ref(null);
     let context = null;
@@ -17,7 +16,6 @@ export const useRaster = ()=>{
     const fpsShow = ref(null);
     let angle = 140;
     const fpsVec = [];
-    const ffmpeg = ref(null);
     cam.value = new Camera([0,360,-300],[0,360,0],[0,720,-300]);
     const drawCoordinate = new Matrix([//相机坐标系(相机坐标系为屏幕中心点)到canvas坐标系
        [1,0,0,viewPort.w/2],
@@ -120,7 +118,6 @@ export const useRaster = ()=>{
         model = result.face;
         render();
         play();
-        ffmpeg.value = await loadFFmpeg();
     });
     onUnmounted(()=>{
         cancelAnimationFrame(handlePlay.value);

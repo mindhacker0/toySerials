@@ -70,3 +70,37 @@ export function calcFPS(vector) {
     // 估算出 1s 内能够绘制的帧数；
     return (1000 / averageTime).toFixed(2);
 }
+export const rotateImageData90 = function (imageData) {
+    const width = imageData.width;
+    const height = imageData.height;
+    const data = imageData.data;
+    console.log(data);
+    const newData = new Uint8ClampedArray(width*height*4);
+    const trace = new Array(width*height*4);
+    // 遍历原imageData中的每个像素
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        // 计算新位置
+        const newX = height - 1 - y;
+        const newY = x;
+        // 计算新位置在newData中的索引
+        const newIndex = (newY * height + newX) * 4;
+        // 复制像素数据到新位置
+        newData[newIndex] = data[(y * width + x) * 4]; // R
+        newData[newIndex + 1] = data[(y * width + x) * 4 + 1]; // G
+        newData[newIndex + 2] = data[(y * width + x) * 4 + 2]; // B
+        newData[newIndex + 3] = data[(y * width + x) * 4 + 3]; // A
+        trace[newIndex] = true;
+        trace[newIndex + 1] = true;
+        trace[newIndex + 2] = true;
+        trace[newIndex + 3] = true;
+      }
+    }
+    // for(let i=0;i<trace.length;++i){
+    //     if(trace[i]!==true) console.log(i);
+    // }
+    // console.log(trace)
+    // 创建一个新的ImageData对象，并设置其data属性为翻转后的数据
+    const newImageData = new ImageData(newData, height, width);
+    return newImageData;
+};

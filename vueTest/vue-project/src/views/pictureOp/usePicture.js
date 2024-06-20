@@ -1,5 +1,5 @@
 import {onMounted, ref,reactive, watch} from 'vue';
-import {openFile,readFile,urlToImage} from '@/utils/index';
+import {openFile,readFile,urlToImage,rotateImageData90} from '@/utils/index';
 export const usePicture = ()=>{
     const screenRef = ref(null);
     let context = null;
@@ -43,12 +43,18 @@ export const usePicture = ()=>{
             console.log(imageData.value);
         }
     },{immediate:true});
+    const rotate90 = ()=>{
+       const transData = rotateImageData90(imageData.value);
+       context.putImageData(transData,0,0);
+       console.log(transData)
+    };
     onMounted(async()=>{
         context = screenRef.value.getContext('2d');
     });
     return {
         screenRef,
         selectFile,
-        saveWorkFile
+        saveWorkFile,
+        rotate90
     }
 }
