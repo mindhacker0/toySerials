@@ -22,3 +22,6 @@ package-lock.json*
 *.sln
 *.sw*
 *.project
+
+# Rust Target Files
+ruststartup/**/target/*
