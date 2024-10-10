@@ -23,7 +23,10 @@ const server = http.createServer((req, res) => {
             break;  
         case '.jpg':  
             contentType = 'image/jpeg';  
-            break; 
+            break;
+        case '.wasm':  
+            contentType = 'application/wasm';  
+            break;
         // 你可以继续添加其他文件类型的处理  
     }  
     // 检查文件是否存在  
