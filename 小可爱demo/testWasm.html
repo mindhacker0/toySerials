@@ -5,7 +5,7 @@
 </style>
 
 <body>
-    <script>
+    <!-- <script>
         let memory = null;
         let cachedUint8ArrayMemory0 = null;
         const cachedTextDecoder = (typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { ignoreBOM: true, fatal: true }) : { decode: () => { throw Error('TextDecoder not available') } } );
@@ -36,7 +36,19 @@
             greet()
         }
         init();
-    </script>
+    </script> -->
+    <div><canvas id="myapp" width="1920" height="1080"></canvas></div>
+    <script type="module">  
+        import init, { startup_web } from './wasm/wasm_cli.js';  
+        window.get_assets_path  = ()=>"/";
+        window.get_canvas_id = ()=>"#myapp"
+        async function run() {  
+            await init();  
+            startup_web();  
+        }  
+  
+        run();  
+    </script>  
 </body>
 
 </html>

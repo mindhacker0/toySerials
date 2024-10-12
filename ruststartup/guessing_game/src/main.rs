@@ -3,6 +3,8 @@ use std::cmp::Ordering;
 use rand::Rng;
 use crate::garden::{add_number,dec_number};
 use crate::garden::flower::Asparagus;
+use guessing_game::{eat_at_restaurant};
+use std::collections::*;
 
 pub mod garden;
 macro_rules! my_macro {
@@ -23,6 +25,7 @@ fn main() {
     let plant = Asparagus {};
     println!("I'm growing {plant:?}!");
     my_macro!(add_number(secret_number,2));
+    eat_at_restaurant();
     loop {
         println!("please enter your guess!");
         let mut guess: String = String::new();
