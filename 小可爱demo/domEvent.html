@@ -1,0 +1,41 @@
+<html>
+<head></head>
+<style>
+    
+</style>
+
+<body>
+    <div id="wrap"><canvas id="cnt" width="100" height="100" style="width: 100px;height: 100px;background: skyblue;"></canvas></div>
+    <script>
+        const wrap = document.getElementById("wrap");
+        const target = document.getElementById("cnt");
+        wrap.addEventListener("keydown",(e) => {
+            if (e.code === "KeyV" && (e.ctrlKey === true || e.metaKey === true)) {
+                console.log("wrap",e);
+            }
+        });
+        wrap.addEventListener("keydown",(e) => {
+            if (e.code === "KeyV" && (e.ctrlKey === true || e.metaKey === true)) {
+                console.log("wrap capture",e);
+            }
+        },true);
+        target.addEventListener("keydown",(e) => {
+            if (e.code === "KeyV" && (e.ctrlKey === true || e.metaKey === true)) {
+                console.log("cnt",e);
+            }
+        });
+        target.addEventListener("keydown",(e) => {
+            if (e.code === "KeyV" && (e.ctrlKey === true || e.metaKey === true)) {
+                console.log("cnt capture",e);
+            }
+        },true);
+        document.addEventListener("paste", (e) => {
+          console.log("xxxx",e);
+        });
+        // document.addEventListener("paste", (e) => {
+        //   console.log("UI粘贴事件监听",e);
+        // });
+    </script>
+</body>
+
+</html>
