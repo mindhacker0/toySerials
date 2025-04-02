@@ -111,6 +111,10 @@ checkBrowsers(paths.appPath, isInteractive)
       ...createDevServerConfig(proxyConfig, urls.lanUrlForConfig),
       host: HOST,
       port,
+      headers: {
+        'Cross-Origin-Embedder-Policy': 'require-corp',
+        'Cross-Origin-Opener-Policy': 'same-origin',
+      },
     };
     const devServer = new WebpackDevServer(serverConfig, compiler);
     // Launch WebpackDevServer.

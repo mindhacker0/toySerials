@@ -13,11 +13,9 @@ const routes = [
     } 
 ];
 export default (props)=>{
-    console.log(props)
-
     return <BrowserRouter>
         <Routes>
-           {routes.map(({path,component:BindComponent})=>(<Route path ={path} element={<BindComponent {...props}/>}></Route>))}
+           {routes.map(({path,component:BindComponent})=>(<Route path ={path} key={path} element={<BindComponent {...props}/>}></Route>))}
         </Routes>
     </BrowserRouter>
 }
