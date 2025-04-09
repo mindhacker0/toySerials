@@ -7,7 +7,7 @@ const handler = proxy({
   url: `rtsp://stream.strba.sk:1935/strba/VYHLAD_JAZERO.stream`,
   // if your RTSP stream need credentials, include them in the URL as above
   verbose: true,   
-  additionalFlags:['-pix_fmt', 'yuv420p',"-probesize","50000000","-analyzeduration","20000000","-c:a","mp2"]
+  additionalFlags:['-pix_fmt', 'yuv420p',"-probesize","50000000","-analyzeduration","20000000","-c:a","mp2","-rtsp_transport","tcp"]
 });
 
 // the endpoint our RTSP uses
