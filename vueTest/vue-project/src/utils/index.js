@@ -1,20 +1,28 @@
-export const openFile = function(accept){//文件选择
-    return new Promise((reslove,reject)=>{
-        let fileInput = document.querySelector('input#pictureSelect');
-        if(!fileInput){
-            fileInput = document.createElement("input");
-            fileInput.style.display = "none";
-            fileInput.setAttribute("type","file");
-            fileInput.setAttribute("id","pictureSelect");
-            fileInput.setAttribute("accept",accept);
-            fileInput.addEventListener("change",(e)=>{
-                reslove(e);
-                document.body.removeChild(fileInput);
-            });
-            document.body.appendChild(fileInput);
-        }
-        fileInput.click();
-    });
+interface OpenFileFn{
+    (param:{accept:string,multiple:boolean;id:string;}):Promise<Event>;
+}
+export const openFile:OpenFileFn = function(params){//文件选择
+    const {accept,multiple,id} = params;
+  return new Promise((reslove,reject)=>{
+      let fileInput:HTMLInputElement | null = document.querySelector(`input#${id}`);
+      if(!fileInput){
+          fileInput = document.createElement("input");
+          fileInput.style.display = "none";
+          fileInput.setAttribute("type","file");
+          fileInput.setAttribute("id",id);
+          fileInput.setAttribute("accept",accept);
+          if(multiple){
+            fileInput.setAttribute("webkitdirectory","true");
+            fileInput.setAttribute("directory","true");
+          }
+          fileInput.addEventListener("change",(e)=>{
+              reslove(e); 
+              document.body.removeChild(fileInput!);
+          });
+          document.body.appendChild(fileInput);
+      }
+      fileInput.click();
+  });
 };
 export const readFile = function(file){//读取文件转为url
     return new Promise((resolve,reject)=>{
