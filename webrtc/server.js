@@ -1,6 +1,7 @@
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+const { spawn } = require('child_process');
 const PORT = 8888;
 const mime = {
     '.html': 'text/html; charset=utf-8',
@@ -22,11 +23,41 @@ const mime = {
     '.ts': 'video/MP2T',
     '.mpd': 'application/dash+xml',
 };
+const rtspUrl = "rtsp://stream.strba.sk:1935/strba/VYHLAD_JAZERO.stream";
+const localUrl = "rtsp://admin:rhkj1987@192.168.0.113:554/Streaming/Channels/1";
 const handleRequest = (req,res)=>{  
-   console.log(req.url)
-   if(req.url === "/stream/receiver/demo"){
-
-   }
+    console.log(req.url)
+    if(req.url === "/stream/receiver/demo"){
+        const stream = spawn(
+            'ffmpeg',
+            [
+            '-rtsp_transport','tcp',
+            '-i',localUrl,
+            '-c:v','libvpx',
+            '-quality','realtime',
+            '-cpu-used','4',
+            '-deadline','1',
+            '-b:v','2M',
+            '-c:a','libopus',
+            '-ar','48000',
+            '-ac','2',
+            '-f','webm',
+            '-flush_packets','0',
+            '-fflags','+nobuffer',
+            'pipe:1',
+            ],
+            { detached: false, windowsHide:true },
+        );//转为webm流
+        stream.stderr.on('data', () => {});
+        stream.stderr.on('error', (e) => console.log('err:error', e));
+        stream.stdout.on('error', (e) => console.log('out:error', e));
+        stream.on('error', (err) => {
+            console.warn(`ffmpeg exec Error: ${err.message}`);
+        });
+        stream.stdout.on('data', (data) => {
+            console.log('stream data:', data);
+        });
+    }
 };
 const server = http.createServer((req, res) => {
     const pathname = req.url.split("?").shift();
@@ -61,6 +92,6 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => { 
-    console.log('Server is running on http://localhost:3000');
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
 

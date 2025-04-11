@@ -1,6 +1,7 @@
 const http = require('http');  
 const fs = require('fs');  
 const path = require('path');
+const { exec } = require('child_process');
 const PORT = 8087;
 const cors = (req,res)=>{//跨域
     const method = req.method && req.method.toUpperCase && req.method.toUpperCase();
@@ -51,7 +52,9 @@ const parseFormHead = (str)=>{//hyperText - 表单头部解析
     if(key!=="") res[key] = value;
     return res;
 }
-const server = http.createServer((req, res) => {  
+const server = http.createServer((req, res) => {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
     // 假设我们的静态文件都放在 public 目录下  
     const filePath = './' + req.url;  
     const extname = path.extname(filePath);  
