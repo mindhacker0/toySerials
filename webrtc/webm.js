@@ -1,5 +1,5 @@
 const video = document.getElementById('videoElem');
-
+localStorage.setItem("webrtc-internal-exporter:debug", "true")
 let ws;
 const stream = new MediaStream();
 const configuration = {
@@ -44,7 +44,7 @@ async function startStream() {
     channel.onopen = () => {
         console.log('channel open');
         channel.send("Hi you!");
-        setInterval(() => channel.send('ping'), 1000); // send ping becouse PION doesn't handle RTCSessionDescription.close()
+        // setInterval(() => channel.send('ping'), 1000); // send ping becouse PION doesn't handle RTCSessionDescription.close()
     };
     // 处理WebSocket消息
     ws.onmessage = async (event) => {

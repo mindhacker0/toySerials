@@ -59,6 +59,34 @@ const handleRequest = (req,res)=>{
         });
     }
 };
+function HlsStream() {
+    ffmpeg -re -i rtsp://admin:rhkj1987@192.168.0.113:554/Streaming/Channels/1 -c copy -f flv rtmp://localhost/live/livestream
+    const stream = spawn(
+        'ffmpeg',
+        [
+        '-rtsp_transport','tcp',
+        '-i',localUrl,
+        '-c:v', 'copy', 
+        '-f','hls',
+        '-lhls','1',
+        '-hls_time','10',
+        '-hls_flags', 'independent_segments',
+        '-hls_segment_type','fmp4',
+        'tmp/stream.m3u8'
+        ],
+        { detached: false, windowsHide:true },
+    );
+    console.log('HlsStream', stream.pid)
+    stream.stderr.on('data', () => {});
+    stream.stderr.on('error', (e) => console.log('err:error', e));
+    stream.stdout.on('error', (e) => console.log('out:error', e));
+    stream.on('error', (err) => {
+        console.warn(`ffmpeg exec Error: ${err.message}`);
+    });
+    stream.stdout.on('data', (data) => {
+        console.log('stream data:', data);
+    });
+}
 const server = http.createServer((req, res) => {
     const pathname = req.url.split("?").shift();
     if(pathname.match(/^\/stream/)){//处理接口请求
@@ -90,7 +118,7 @@ const server = http.createServer((req, res) => {
         });  
     });
 });
-
+HlsStream();
 server.listen(PORT, () => { 
     console.log(`Server is running on http://localhost:${PORT}`);
 });

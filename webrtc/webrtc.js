@@ -41,3 +41,5 @@ function webRtcInit(){
       setInterval(() => channel.send('ping'), 1000); // send ping becouse PION doesn't handle RTCSessionDescription.close()
     };
 }
+webRtcInit();
+//rtsp://stream.strba.sk:1935/strba/VYHLAD_JAZERO.stream
