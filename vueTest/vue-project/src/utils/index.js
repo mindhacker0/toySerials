@@ -1,10 +1,8 @@
-interface OpenFileFn{
-    (param:{accept:string,multiple:boolean;id:string;}):Promise<Event>;
-}
-export const openFile:OpenFileFn = function(params){//文件选择
+
+export const openFile = function(params){//文件选择
     const {accept,multiple,id} = params;
   return new Promise((reslove,reject)=>{
-      let fileInput:HTMLInputElement | null = document.querySelector(`input#${id}`);
+      let fileInput = document.querySelector(`input#${id}`);
       if(!fileInput){
           fileInput = document.createElement("input");
           fileInput.style.display = "none";
@@ -17,7 +15,7 @@ export const openFile:OpenFileFn = function(params){//文件选择
           }
           fileInput.addEventListener("change",(e)=>{
               reslove(e); 
-              document.body.removeChild(fileInput!);
+              document.body.removeChild(fileInput);
           });
           document.body.appendChild(fileInput);
       }
