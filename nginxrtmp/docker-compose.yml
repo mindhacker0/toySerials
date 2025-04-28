@@ -1,0 +1,11 @@
+services:
+  hmi-render-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hmi-render-web
+    container_name: hmi-render-web
+    hostname: hmi-render
+    restart: always
+    ports:
+      - "8012:80"

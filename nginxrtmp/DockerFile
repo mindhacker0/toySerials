@@ -1,0 +1,9 @@
+FROM nginx:latest
+
+USER root
+WORKDIR /app
+
+COPY --chown=node:node ./nginx/nginx.conf /etc/nginx/
+COPY --chown=node:node ./nginx/server.conf /etc/nginx/conf.d/
+
+EXPOSE 80

@@ -60,7 +60,7 @@ const handleRequest = (req,res)=>{
     }
 };
 function HlsStream() {
-    ffmpeg -re -i rtsp://admin:rhkj1987@192.168.0.113:554/Streaming/Channels/1 -c copy -f flv rtmp://localhost/live/livestream
+    // ffmpeg -re -i rtsp://admin:rhkj1987@192.168.0.113:554/Streaming/Channels/1 -c copy -f flv rtmp://localhost/live/livestream
     const stream = spawn(
         'ffmpeg',
         [

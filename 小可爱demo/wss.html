@@ -2,21 +2,25 @@
     <head>
         <meta charset="utf-8"> 
         <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.4.1/dist/socket.io.js"></script>  
-        <script>  
-          var socket = io('ws://localhost:6200');  
-          socket.on('connect', function() {  
-            console.log('Connected to the server!');  
-            socket.emit('message', 'Hello from client!');  
-          });  
-          
-          socket.on('message', function(data) {  
-            console.log('Received from server:', data);  
-          });  
-        </script>
     </head>
     <body>
-        <script>
-           
-        </script>
+      <video width="100%" id="videoElem" autoplay muted controls></video>
+      <script>  
+        var socket = io('ws://localhost:6200');
+        const video = document.getElementById('videoElem');
+        const stream = new MediaStream();
+        const mediaSource = new MediaSource();
+        video.src = URL.createObjectURL(mediaSource);
+        mediaSource.addEventListener('sourceopen', function() {  
+          const sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
+          socket.on('video-stream', function(data) {  
+          console.log('Received video-stream from server:', data);
+            if(!sourceBuffer.updating && mediaSource.readyState === "open") sourceBuffer.appendBuffer(data);
+          });  
+        });
+        socket.on('connect', function() {  
+          console.log('Connected to the server!');  
+        });
+      </script>
     </body>
 </html>

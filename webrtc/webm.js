@@ -8,6 +8,24 @@ const configuration = {
 video.addEventListener('error', () => {
     console.error('Video error:', video.error);
 });
+const mediaSource = new MediaSource();
+video.src = URL.createObjectURL(mediaSource);
+let sourceBuffer = null;
+mediaSource.onsourceopen = () => {  
+    sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
+}
+const appendBuffer = [];
+let state = 0;
+function consumeBuffer(){
+    if(state === 1) return;
+    state = 1;
+    while(appendBuffer.length > 0 && sourceBuffer && !sourceBuffer.updating){
+        const data = appendBuffer.shift();
+        console.log('appendBuffer:', data, sourceBuffer.updating);
+        sourceBuffer.appendBuffer(data);
+    }
+    state = 0;
+}
 async function startStream() {
   // 初始化WebSocket连接
   ws = new WebSocket(`ws://${window.location.hostname}:3003`);
@@ -37,8 +55,14 @@ async function startStream() {
             }));
         }
     };
-    const channel = connection.createDataChannel("chat", { maxRetransmits: 10 });
-    channel.onmessage = (e) => console.log('channel message:', channel.label, 'payload', e.data);
+    const channel = connection.createDataChannel("chat",{ordered: true});
+    channel.onmessage = (e) =>{
+        console.log('channel message:', e.data);
+        e.data = null;
+        if(sourceBuffer && !sourceBuffer.updating) sourceBuffer.appendBuffer(e.data);
+        // appendBuffer.push(e.data);
+        // consumeBuffer();
+    } 
     channel.onerror = (e) => console.log('channel error:', channel.label, 'payload', e);
     channel.onclose = () => console.log('channel close');
     channel.onopen = () => {
