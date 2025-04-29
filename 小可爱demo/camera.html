@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <style></style>
+    </head>
+    <body>
+        <div>
+            <video id="localVideo" autoplay playsinline></video>
+            <video id="remoteVideo" autoplay playsinline></video>
+            <button onclick="getLocalMedia()">启动摄像头</button>
+        </div>
+        <script>
+            let localStream;
+            async function getLocalMedia() {
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ 
+                        video: true, 
+                        audio: false 
+                    });
+                    document.getElementById('localVideo').srcObject = localStream;
+                } catch (error) {
+                    console.error('摄像头获取失败:', error);
+                }
+            }
+            getLocalMedia()
+        </script>
+    </body>
+</html>

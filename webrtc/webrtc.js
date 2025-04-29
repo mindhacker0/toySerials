@@ -1,27 +1,20 @@
-const videoElement = document.getElementById('videoElem');
-function webRtcInit(){
-    const suuid = "reowhite";
-    const stream = new MediaStream();
-    const connection = new RTCPeerConnection();
-    connection.oniceconnectionstatechange = () => console.log('connection', connection.iceConnectionState);
+let clientId = null;
+const videoElem = document.getElementById('videoElem');
+const stream = new MediaStream();
+const connection = new RTCPeerConnection();
+const ws = new WebSocket(`ws://${window.location.hostname}:3004`);
+ws.onopen = ()=>{
+    ws.send(JSON.stringify({type:'ping'}));
     connection.onnegotiationneeded = async () => {
         //will be called during the initial setup of the connection
         //or any time a change to the communication environment requires reconfiguring the connection.
         console.log('negotiation needed');
         const offer = await connection.createOffer();
         await connection.setLocalDescription(offer);
-        const res = await fetch(`http://localhost:8002/stream/receiver/${suuid}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-            body: new URLSearchParams({
-                suuid: `${suuid}`,
-                data: `${btoa(connection.localDescription?.sdp || '')}`,
-            }),
-        });
-        const data = (res && res.ok) ? await res.text() : '';
-        connection.setRemoteDescription(new RTCSessionDescription({
-            type: 'answer',
-            sdp: atob(data),
+        ws.send(JSON.stringify({
+            type: 'offer',
+            clientId: clientId,
+            offer: offer
         }));
     };
     connection.ontrack = (event) => {
@@ -31,15 +24,56 @@ function webRtcInit(){
         videoElem.onloadeddata = async () => console.log('resolution:', videoElem.videoWidth, videoElem.videoHeight);
         console.log('received track:', event.track, event.track.getSettings());
     };
-    connection.addTransceiver("video", { direction: 'sendrecv' });  
-    const channel = connection.createDataChannel(suuid, { maxRetransmits: 10 });
-    channel.onmessage = (e) => console.log('channel message:', channel.label, 'payload', e.data);
-    channel.onerror = (e) => console.log('channel error:', channel.label, 'payload', e);
-    channel.onclose = () => console.log('channel close');
-    channel.onopen = () => {
-        console.log('channel open');
-      setInterval(() => channel.send('ping'), 1000); // send ping becouse PION doesn't handle RTCSessionDescription.close()
+    connection.oniceconnectionstatechange = () => console.log('connection', connection.iceConnectionState);
+    // 设置ICE候选处理
+    connection.onicecandidate = (event) => {
+        if(event.candidate){
+            ws.send(JSON.stringify({
+                type: 'candidate',
+                clientId: clientId,
+                candidate: event.candidate
+            }));
+        }
     };
 }
-webRtcInit();
+ws.onmessage = async (e)=>{
+    const data = JSON.parse(e.data);
+    console.log('ws received:', data);
+    if(data.type === 'regist'){
+        clientId = data.clientId;
+    }
+    if(data.type ==='offer'){
+        await connection.setRemoteDescription(data.offer);
+        const answer = await connection.createAnswer();
+        await connection.setLocalDescription(answer);
+        console.log('send answer',answer);
+        ws.send(JSON.stringify({
+            type: 'answer',
+            clientId: clientId,
+            answer: answer.sdp,
+        }));
+    }
+    if(data.type === "answer"){
+        await connection.setRemoteDescription(new RTCSessionDescription({
+            type: 'answer',
+            sdp: data.answer,
+        }));
+    }
+    if(data.type === "candidate"){
+        await connection.addIceCandidate(new RTCIceCandidate(data.candidate));
+    }
+}
+
+
+async function connect(){
+    const localStream = await navigator.mediaDevices.getUserMedia({ 
+        video: true, 
+        audio: false 
+    });
+    localStream.getTracks().forEach(track => {
+        connection.addTrack(track, localStream);
+    });
+    connection.addTransceiver("video", { direction: 'sendrecv' });
+}
+
 //rtsp://stream.strba.sk:1935/strba/VYHLAD_JAZERO.stream
