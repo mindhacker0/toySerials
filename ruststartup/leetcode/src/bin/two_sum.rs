@@ -20,5 +20,3 @@ impl Solution {
         return ans;
     }
 }
-
-Solution::two_sum(vec![2,7,11,15],9);
