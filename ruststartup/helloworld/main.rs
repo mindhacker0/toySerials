@@ -77,13 +77,29 @@ use hello_world::hello;
 // type 创建类型别名
 // where 泛型约束
 // dyn 主要用于与动态分发和多态性相关的场景，尤其是在涉及 trait 对象的时候。
-// 
+// 定义 宏
+macro_rules! say_hello {
+    () => {
+        println!("Hello!");
+    };
+}
+//生命周期标注
+// 引用是否总是有效
+// 引用是否比它指向的数据存活时间更长
+// 多个引用之间的存活关系
+// <'a> 声明生命周期参数
+// x: &'a str 和 y: &'a str 表示两个参数必须有相同或兼容的生命周期
+// -> &'a str 表示返回值至少和 'a 活得一样长
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() { x } else { y }
+}
+//'ident	Named lifetime or loop label
 //使用模块
 fn main(){
     println!("hello world!");
     let mut x = 6;
     let y = "    ";
-    println!("x is {}",x);
+    println!("x is {}",x);  
     x = 7;
     println!("x is {}",x);
     println!("constant is {}",TIME_IN_DAY);
@@ -91,5 +107,7 @@ fn main(){
     unsafe {
         COUNTER += 1;
     }
+    say_hello!();
+    *const COUNTER6 = 5;
 }
 //main();
