@@ -3,14 +3,14 @@ use super::Solution;
 
 impl Solution {
     pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
-        let mut numberMap = HashMap::new();
+        let mut number_map = HashMap::new();
         let mut ans = Vec::new();
         for (i,&item) in nums.iter().enumerate() {
-            numberMap.insert(target - item,i);
+            number_map.insert(target - item,i);
         }
-        println!("{:?}",numberMap);
+        println!("{:?}",number_map);
         for (i,item) in nums.iter().enumerate() {
-           if let Some(prev_index) = numberMap.remove(&item) {
+           if let Some(prev_index) = number_map.remove(&item) {
                 if prev_index != i {
                     //println!("Found duplicate at {} and {}", prev_index, i);
                     ans.push(i as  i32);

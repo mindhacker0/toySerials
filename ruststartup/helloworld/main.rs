@@ -90,6 +90,11 @@ macro_rules! say_hello {
 // <'a> 声明生命周期参数
 // x: &'a str 和 y: &'a str 表示两个参数必须有相同或兼容的生命周期
 // -> &'a str 表示返回值至少和 'a 活得一样长
+// 必须显式标注生命周期的情况
+
+// 函数返回引用且依赖输入引用
+//  结构体/枚举包含引用字段
+// trait 对象包含引用
 fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
     if x.len() > y.len() { x } else { y }
 }
