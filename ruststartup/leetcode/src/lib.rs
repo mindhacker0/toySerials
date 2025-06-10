@@ -2,7 +2,7 @@
 pub mod problem;//声明 problem模块
 
 pub fn public_fn() {
-    println!("public_fn");
+    // println!("public_fn");
     problem::run_test();
 }
 
@@ -52,4 +52,33 @@ impl ListNode {
       val
     }
   }
+}
+
+#[derive(Copy, Clone, PartialEq)]
+pub struct HeapNode<T> {
+    value: T,
+    index: usize,
+}
+
+pub struct Heap<T> {
+    data: Vec<Option<HeapNode<T>>>,
+}
+
+impl<T> Heap<T>{
+    fn new() -> Self {
+        Heap { data: vec![None] }
+    }
+    fn offer(&mut self,elem: HeapNode<T>) {
+        // 添加元素到堆中
+        self.data.push(Some(elem));
+    }
+    fn poll(&mut self)->Option<HeapNode<T>> {
+        // 删除堆顶元素
+        if self.data.len() <= 1 {
+            return None; // 堆为空
+        }
+        std::mem::swap(&mut self.data[1], &mut self.data[self.data.len() - 1]);
+        let removed = self.data.pop(); // 移除最后一个元素
+        removed
+    }
 }
