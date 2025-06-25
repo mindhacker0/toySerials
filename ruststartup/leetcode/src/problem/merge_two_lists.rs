@@ -1,5 +1,5 @@
 use super::Solution;
-use crate::ListNode;
+use crate::tool::link::ListNode;
 //Merge Two Sorted Lists
 impl Solution {
     pub fn merge_two_lists(list1: Option<Box<ListNode>>, list2: Option<Box<ListNode>>) -> Option<Box<ListNode>> {

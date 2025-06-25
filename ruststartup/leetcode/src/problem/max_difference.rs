@@ -14,7 +14,7 @@ impl Solution {
         print!("{:?}", char_map);
         let mut max_odd = 0;
         let mut min_even = usize::MAX;
-        for (c, count) in char_map.iter() {
+        for (_c, count) in char_map.iter() {
             if count % 2 == 0 {
                 min_even = min_even.min(*count);
             } else {
