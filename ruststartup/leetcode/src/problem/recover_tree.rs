@@ -12,21 +12,36 @@ use std::cell::RefCell;
 // 左右节点互换
 impl Solution {
     pub fn recover_tree(root: &mut Option<Rc<RefCell<TreeNode>>>) {
-        let mut points:Vec<Rc<RefCell<TreeNode>>> = vec![];
-        fn tranverse(node: &mut Option<Rc<RefCell<TreeNode>>>,arr:&mut Vec<Rc<RefCell<TreeNode>>>) {
+        let mut prev:Option<Rc<RefCell<TreeNode>>> = None;
+        let mut first:Option<Rc<RefCell<TreeNode>>> = None;
+        let mut second:Option<Rc<RefCell<TreeNode>>> = None;
+        let tranverse: Rc<RefCell<Box<dyn FnMut(&mut Option<Rc<RefCell<TreeNode>>>)>>> = Rc::new(RefCell::new(Box::new(|node: &mut Option<Rc<RefCell<TreeNode>>>| {})));
+        let tranverse_clone = Rc::clone(&tranverse);
+        *tranverse.borrow_mut() = Box::new(move |node: &mut Option<Rc<RefCell<TreeNode>>>| {
             if node.is_none() { return; }
-            let val:i32 = node.as_ref().unwrap().borrow().val;
-            if node.as_ref().unwrap().borrow().left.is_some() {
-                let left_val:i32 = node.as_ref().unwrap().borrow().left.as_ref().unwrap().borrow().val;
-                if val > left_val { arr.push(node.as_ref().unwrap().clone()); } //非法的节点
-                if node.as_ref().unwrap().borrow().right.is_some() {
-                    let right_val:i32 = node.as_ref().unwrap().borrow().right.as_ref().unwrap().borrow().val;
-                    if val > right_val { arr.push(node.as_ref().unwrap().clone()); } //非法的节点
-                    if left_val > right_val { arr.push(node.as_ref().unwrap().clone()); } //非法的节点
+            if let Some(ref left_node) = node.as_ref().unwrap().borrow().left {
+                let mut left_option = Some(left_node.clone());
+                tranverse_clone.borrow_mut()(&mut left_option);
+            }
+            if let Some(prev_node) = &prev {
+                // Add logic here for comparison or assignment
+                if prev_node.borrow().val > node.as_ref().unwrap().borrow().val {
+                    if first.is_none() { first = Some(prev_node.clone()); }
+                    second = node.clone();
                 }
             }
+            prev = node.clone();
+            if let Some(ref right_node) = node.as_ref().unwrap().borrow().right {
+                let mut right_option = Some(right_node.clone());
+                tranverse_clone.borrow_mut()(&mut right_option);
+            }
+        });
+        tranverse.borrow_mut()(root);
+        if let (Some(first_node), Some(second_node)) = (first, second) {
+            let first_val = first_node.borrow().val;
+            let second_val = second_node.borrow().val;
+            first_node.borrow_mut().val = second_val;
+            second_node.borrow_mut().val = first_val;
         }
-        tranverse(root,&mut points);
-        println!("points: {:?}", points);
     }
-}
+}  
