@@ -9,39 +9,29 @@ use std::cell::RefCell;
 // 三种可能
 // 头和某个左节点交换
 // 头和某个右节点交换
-// 左右节点互换
+// 左右节点互换 
+// 默认情况下，闭包会按以下优先级捕获变量，**自动实现**Fn FnMut FnOnce Traits：
+// 不可变借用（&T）
+// 可变借用（&mut T）
+// 所有权（T）
+// 闭包可以通过 mut 修饰变量，可以修改参数为可变借用
+// 闭包可以通过move 关键字，将参数所有权移动到闭包中，无论是否有必要，但是对实现的Trait没有任何影响
 impl Solution {
     pub fn recover_tree(root: &mut Option<Rc<RefCell<TreeNode>>>) {
-        let mut prev:Option<Rc<RefCell<TreeNode>>> = None;
-        let mut first:Option<Rc<RefCell<TreeNode>>> = None;
-        let mut second:Option<Rc<RefCell<TreeNode>>> = None;
-        let tranverse: Rc<RefCell<Box<dyn FnMut(&mut Option<Rc<RefCell<TreeNode>>>)>>> = Rc::new(RefCell::new(Box::new(|node: &mut Option<Rc<RefCell<TreeNode>>>| {})));
-        let tranverse_clone = Rc::clone(&tranverse);
-        *tranverse.borrow_mut() = Box::new(move |node: &mut Option<Rc<RefCell<TreeNode>>>| {
-            if node.is_none() { return; }
-            if let Some(ref left_node) = node.as_ref().unwrap().borrow().left {
-                let mut left_option = Some(left_node.clone());
-                tranverse_clone.borrow_mut()(&mut left_option);
-            }
-            if let Some(prev_node) = &prev {
-                // Add logic here for comparison or assignment
-                if prev_node.borrow().val > node.as_ref().unwrap().borrow().val {
-                    if first.is_none() { first = Some(prev_node.clone()); }
-                    second = node.clone();
-                }
-            }
-            prev = node.clone();
-            if let Some(ref right_node) = node.as_ref().unwrap().borrow().right {
-                let mut right_option = Some(right_node.clone());
-                tranverse_clone.borrow_mut()(&mut right_option);
-            }
-        });
-        tranverse.borrow_mut()(root);
-        if let (Some(first_node), Some(second_node)) = (first, second) {
-            let first_val = first_node.borrow().val;
-            let second_val = second_node.borrow().val;
-            first_node.borrow_mut().val = second_val;
-            second_node.borrow_mut().val = first_val;
+        // let mut prev:Option<Rc<RefCell<TreeNode>>> = None;
+        // let first: Rc<RefCell<Option<TreeNode>>> = Rc::new(RefCell::new(None));
+        // let second: Rc<RefCell<Option<TreeNode>>> = Rc::new(RefCell::new(None)); //: <Box<dyn FnMut(&mut Option<Rc<RefCell<TreeNode>>>)>>
+
+        fn y_combinator<A, R, F>(f: F) -> impl Fn(A) -> R
+        where
+            F: Fn(&dyn Fn(A) -> R, A) -> R,
+        {
+            move |a| f(&y_combinator(&f), a)
         }
+
+        let factorial = y_combinator(|f, n| {
+            if n == 0 { 1 } else { n * f(n - 1) }
+        });
+        println!("{}", factorial(5));  // 输出 120
     }
-}  
+}
