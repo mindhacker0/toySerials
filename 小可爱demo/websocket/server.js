@@ -22,6 +22,6 @@ io.createServer(connection=>{
             console.log('服务异常关闭...')
         })	
 	})
-}).listen(8888,()=>{
+}).listen(7777,()=>{
     console.log("开始监听客户端")
 })
