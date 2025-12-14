@@ -19,6 +19,7 @@ wasm-bindgen = "0.2.84"
 # code size when deploying.
 console_error_panic_hook = { version = "0.1.7", optional = true }
 bevy = "0.14.2"
+bevy_obj = "0.16"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐播放与音调跳跃可视化</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .player-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .track-info {
+            margin-bottom: 1.5rem;
+        }
+        
+        .track-title {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .track-artist {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .play-btn {
+            background: rgba(255, 255, 255, 0.3);
+            width: 70px;
+            height: 70px;
+            font-size: 1.8rem;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff8a00, #e52e71);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .visualizer-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin-top: 2rem;
+        }
+        
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+        }
+        
+        .visualizer-info {
+            margin-top: 1rem;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .player-container {
+                padding: 1.5rem;
+            }
+            
+            .control-btn {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .play-btn {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>音调跳跃可视化</h1>
+        <p class="subtitle">感受音乐频率的动态跳跃</p>
+        
+        <div class="player-container">
+            <div class="track-info">
+                <h2 class="track-title">电子旋律</h2>
+                <p class="track-artist">音频可视化演示</p>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" id="prevBtn">⏮</button>
+                <button class="control-btn play-btn" id="playBtn">▶</button>
+                <button class="control-btn" id="nextBtn">⏭</button>
+            </div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="time-info">
+                <span id="currentTime">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+        </div>
+        
+        <div class="visualizer-container">
+            <canvas id="visualizer"></canvas>
+        </div>
+        
+        <p class="visualizer-info">可视化效果实时反映音频频率变化，条状高度表示不同频段的强度</p>
+        
+        <div class="loading" id="loading">
+            <p class="pulse">音频分析中，请稍候...</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const playBtn = document.getElementById('playBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const currentTimeEl = document.getElementById('currentTime');
+            const durationEl = document.getElementById('duration');
+            const visualizer = document.getElementById('visualizer');
+            const loading = document.getElementById('loading');
+            
+            const canvasCtx = visualizer.getContext('2d');
+            
+            // 设置Canvas尺寸
+            function setupCanvas() {
+                visualizer.width = visualizer.offsetWidth;
+                visualizer.height = visualizer.offsetHeight;
+            }
+            
+            setupCanvas();
+            window.addEventListener('resize', setupCanvas);
+            
+            // 创建音频上下文和分析器
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            
+            // 创建音频元素
+            const audio = new Audio();
+            
+            // 使用示例音频（电子音乐风格）
+            audio.src = 'assets/tttt.ogg';
+            
+            // 创建音频源节点
+            const source = audioContext.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+            
+            // 播放/暂停功能
+            playBtn.addEventListener('click', function() {
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                if (audio.paused) {
+                    audio.play();
+                    playBtn.innerHTML = '⏸';
+                    loading.style.display = 'block';
+                    
+                    // 延迟隐藏加载提示
+                    setTimeout(() => {
+                        loading.style.display = 'none';
+                    }, 1000);
+                } else {
+                    audio.pause();
+                    playBtn.innerHTML = '▶';
+                }
+            });
+            
+            // 上一曲/下一曲按钮（演示用）
+            prevBtn.addEventListener('click', function() {
+                alert('演示功能：切换到上一首歌曲');
+            });
+            
+            nextBtn.addEventListener('click', function() {
+                alert('演示功能：切换到下一首歌曲');
+            });
+            
+            // 进度条功能
+            function updateProgress() {
+                const { duration, currentTime } = audio;
+                
+                if (duration) {
+                    const progressPercent = (currentTime / duration) * 100;
+                    progressBar.style.width = `${progressPercent}%`;
+                    
+                    // 更新时间显示
+                    currentTimeEl.textContent = formatTime(currentTime);
+                    durationEl.textContent = formatTime(duration);
+                }
+            }
+            
+            audio.addEventListener('timeupdate', updateProgress);
+            
+            // 点击进度条跳转
+            progressContainer.addEventListener('click', function(e) {
+                const width = this.clientWidth;
+                const clickX = e.offsetX;
+                const duration = audio.duration;
+                
+                if (duration) {
+                    audio.currentTime = (clickX / width) * duration;
+                }
+            });
+            
+            // 音频结束重置
+            audio.addEventListener('ended', function() {
+                playBtn.innerHTML = '▶';
+                progressBar.style.width = '0%';
+                currentTimeEl.textContent = '0:00';
+            });
+            
+            // 格式化时间显示
+            function formatTime(seconds) {
+                const min = Math.floor(seconds / 60);
+                const sec = Math.floor(seconds % 60);
+                return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+            }
+            
+            // 绘制可视化效果
+            function drawVisualizer() {
+                requestAnimationFrame(drawVisualizer);
+                
+                analyser.getByteFrequencyData(dataArray);
+                
+                canvasCtx.fillStyle = 'rgba(18, 18, 18, 0.1)';
+                canvasCtx.fillRect(0, 0, visualizer.width, visualizer.height);
+                
+                const barWidth = (visualizer.width / bufferLength) * 2.5;
+                let barHeight;
+                let x = 0;
+                
+                // 创建渐变
+                const gradient = canvasCtx.createLinearGradient(0, 0, 0, visualizer.height);
+                gradient.addColorStop(0, '#ff8a00');
+                gradient.addColorStop(0.5, '#da1b60');
+                gradient.addColorStop(1, '#0d47a1');
+                
+                for (let i = 0; i < bufferLength; i++) {
+                    barHeight = dataArray[i] * 1.5;
+                    
+                    canvasCtx.fillStyle = gradient;
+                    canvasCtx.fillRect(x, visualizer.height - barHeight, barWidth, barHeight);
+                    
+                    // 添加顶部高光效果
+                    canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    canvasCtx.fillRect(x, visualizer.height - barHeight, barWidth, 2);
+                    
+                    x += barWidth + 1;
+                }
+                
+                // 添加底部反射效果
+                for (let i = 0; i < bufferLength; i++) {
+                    barHeight = dataArray[i] * 0.8;
+                    
+                    canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                    canvasCtx.fillRect(
+                        i * (barWidth + 1), 
+                        visualizer.height, 
+                        barWidth, 
+                        barHeight
+                    );
+                }
+                
+                // 添加中心圆形音谱
+                canvasCtx.beginPath();
+                canvasCtx.arc(visualizer.width / 2, visualizer.height / 2, 80, 0, 2 * Math.PI);
+                
+                const circleGradient = canvasCtx.createRadialGradient(
+                    visualizer.width / 2, visualizer.height / 2, 0,
+                    visualizer.width / 2, visualizer.height / 2, 80
+                );
+                circleGradient.addColorStop(0, 'rgba(255, 138, 0, 0.8)');
+                circleGradient.addColorStop(1, 'rgba(13, 71, 161, 0.3)');
+                
+                canvasCtx.fillStyle = circleGradient;
+                canvasCtx.fill();
+                
+                // 添加脉动效果
+                const pulseSize = 60 + (dataArray[10] / 255) * 40;
+                canvasCtx.beginPath();
+                canvasCtx.arc(visualizer.width / 2, visualizer.height / 2, pulseSize, 0, 2 * Math.PI);
+                canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                canvasCtx.lineWidth = 2;
+                canvasCtx.stroke();
+            }
+            
+            // 开始绘制可视化效果
+            drawVisualizer();
+            
+            // 音频加载后更新时长
+            audio.addEventListener('loadedmetadata', function() {
+                durationEl.textContent = formatTime(audio.duration);
+            });
+        });
+    </script>
+</body>
+</html>
